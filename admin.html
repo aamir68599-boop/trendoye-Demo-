@@ -535,7 +535,7 @@ async function handleLogin() {
   $('#loginBtn').disabled = true;
   $('#loginBtn').textContent = 'Signing in…';
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    await signInWithEmailAndPassword(auth, email, pass);
     $('#loginError').textContent = '';
   } catch (e) {
     $('#loginError').textContent = e.message.replace('Firebase: ', '');
