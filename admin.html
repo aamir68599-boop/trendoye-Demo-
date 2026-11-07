@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Silk &amp; Soul — Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --primary:#7B2D4E; --primary-dark:#5A1E38; --gold:#C9A96E; --gold-light:#DFC896;
+  --cream:#FCF8F3; --beige:#F0E8DE; --warm-white:#FFFCF9; --text-dark:#2D1B1A;
+  --text-soft:#4A3A38; --text-muted:#7A6A68;
+  --sidebar-bg:#2D1B1A; --sidebar-hover:rgba(201,169,110,.12);
+  --shadow:0 8px 40px rgba(45,27,26,.08); --radius:14px;
+  --green:#1F8A4C; --red:#C0392B; --amber:#D68910; --blue:#2874A6;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#F7F2EC;color:var(--text-dark);line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+.hidden{display:none !important}
+code{background:#f0e8de;padding:1px 6px;border-radius:4px;font-size:.85em}
+
+/* Loading */
+.loading-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#F7F2EC;z-index:1000;font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--primary)}
+.spinner{width:40px;height:40px;border:3px solid var(--gold-light);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin-right:14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Login */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(165deg,#2D1B1A 0%,#4A2C3E 50%,#7B2D4E 100%);padding:20px}
+.login-card{background:var(--warm-white);border-radius:20px;padding:48px 40px;max-width:420px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.login-logo{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--primary);text-align:center;margin-bottom:8px}
+.login-logo span{color:var(--gold)}
+.login-card h2{font-family:'Playfair Display',serif;font-size:1.4rem;text-align:center;color:var(--text-dark);margin-bottom:6px}
+.login-card p{text-align:center;color:var(--text-muted);font-size:.9rem;margin-bottom:28px}
+.login-card input{width:100%;padding:14px 18px;border:2px solid #e5ddd3;border-radius:10px;font-size:1rem;font-family:inherit;margin-bottom:14px;transition:.2s}
+.login-card input:focus{outline:none;border-color:var(--primary)}
+.login-card button{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;transition:.2s}
+.login-card button:hover{background:var(--primary-dark)}
+.login-card button:disabled{opacity:.6;cursor:not-allowed}
+.error{color:var(--red);font-size:.85rem;text-align:center;margin-top:10px;min-height:20px}
+.hint-box{margin-top:20px;padding:12px 16px;background:#F4EDE0;border-radius:8px;font-size:.78rem;color:var(--text-soft);line-height:1.6}
+.hint-box strong{color:var(--primary)}
+
+/* App */
+.app{display:flex;min-height:100vh}
+.sidebar{width:250px;background:var(--sidebar-bg);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:50;transition:.3s}
+.sidebar-logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;padding:24px 22px;border-bottom:1px solid rgba(255,255,255,.08);color:#fff}
+.sidebar-logo span{color:var(--gold)}
+.sidebar nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+.sidebar nav a{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;color:rgba(255,255,255,.7);font-size:.92rem;font-weight:500;transition:.2s;cursor:pointer}
+.sidebar nav a:hover{background:var(--sidebar-hover);color:#fff}
+.sidebar nav a.active{background:var(--gold);color:var(--text-dark);font-weight:600}
+.logout-btn{margin:16px 12px 22px;padding:11px 14px;background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:10px;font-size:.9rem;font-weight:500;transition:.2s}
+.logout-btn:hover{background:rgba(192,57,43,.6);border-color:rgba(192,57,43,.8)}
+.main{margin-left:250px;flex:1;min-height:100vh}
+.topbar{background:var(--warm-white);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(45,27,26,.07);position:sticky;top:0;z-index:40}
+.topbar h1{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--text-dark)}
+.topbar-actions{display:flex;gap:10px;align-items:center}
+.user-email{font-size:.82rem;color:var(--text-muted);margin-right:8px}
+.btn-ghost{background:transparent;border:1px solid #e5ddd3;padding:8px 16px;border-radius:8px;font-size:.85rem;font-weight:500;color:var(--text-soft);transition:.2s}
+.btn-ghost:hover{background:var(--cream);border-color:var(--gold)}
+.content{padding:28px 32px 60px;max-width:1400px}
+
+@media(max-width:900px){
+  .sidebar{width:70px}
+  .sidebar-logo{font-size:0;padding:22px 0;text-align:center}
+  .sidebar-logo::before{content:'✦';font-size:1.6rem;color:var(--gold)}
+  .sidebar nav a span.label{display:none}
+  .sidebar nav a{justify-content:center;padding:12px}
+  .logout-btn{padding:10px;font-size:0}
+  .logout-btn::before{content:'⎋';font-size:1.2rem}
+  .main{margin-left:70px}
+  .topbar{padding:14px 18px}
+  .topbar h1{font-size:1.15rem}
+  .content{padding:18px 16px 40px}
+  .user-email{display:none}
+}
+
+/* Cards */
+.card{background:var(--warm-white);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid rgba(45,27,26,.05);overflow:hidden}
+.card-header{padding:18px 22px;border-bottom:1px solid rgba(45,27,26,.06);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.card-header h3{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--text-dark)}
+.card-body{padding:22px}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;margin-bottom:24px}
+.stat{background:var(--warm-white);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);border:1px solid rgba(45,27,26,.05);position:relative;overflow:hidden;transition:.3s}
+.stat:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(45,27,26,.1)}
+.stat::after{content:'';position:absolute;top:0;right:0;width:4px;height:100%;background:var(--gold)}
+.stat .label{font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-muted);margin-bottom:10px}
+.stat .value{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--text-dark);line-height:1.1}
+.stat .sub{font-size:.8rem;color:var(--text-muted);margin-top:6px}
+
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+table th{text-align:left;padding:12px 10px;font-weight:600;color:var(--text-muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid rgba(45,27,26,.08);white-space:nowrap}
+table td{padding:14px 10px;border-bottom:1px solid rgba(45,27,26,.05);color:var(--text-soft);vertical-align:middle}
+table tr:last-child td{border-bottom:none}
+table tr:hover{background:rgba(201,169,110,.04)}
+.table-wrap{overflow-x:auto}
+.thumb{width:52px;height:62px;border-radius:8px;object-fit:cover;background:var(--beige)}
+.cell-name{font-weight:600;color:var(--text-dark);font-size:.9rem}
+.cell-sub{font-size:.78rem;color:var(--text-muted);margin-top:2px}
+.cell-price{font-weight:600;color:var(--primary)}
+.badge{display:inline-block;padding:3px 10px;border-radius:50px;font-size:.7rem;font-weight:600;letter-spacing:.3px}
+.badge-pending{background:#FEF3E2;color:var(--amber)}
+.badge-processing{background:#E8F1FA;color:var(--blue)}
+.badge-shipped{background:#E8F4FE;color:#1E6FB8}
+.badge-delivered{background:#E8F6EC;color:var(--green)}
+.badge-cancelled{background:#FBEAEA;color:var(--red)}
+.badge-stock-in{background:#E8F6EC;color:var(--green)}
+.badge-stock-low{background:#FEF3E2;color:var(--amber)}
+.badge-stock-out{background:#FBEAEA;color:var(--red)}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.icon-btn{width:32px;height:32px;border-radius:8px;border:1px solid #e5ddd3;background:var(--warm-white);display:inline-flex;align-items:center;justify-content:center;font-size:.95rem;transition:.2s;color:var(--text-soft);text-decoration:none}
+.icon-btn:hover{background:var(--cream);border-color:var(--gold);color:var(--primary)}
+.icon-btn.danger:hover{background:#FBEAEA;border-color:#f5c6c6;color:var(--red)}
+.btn-primary{background:var(--primary);color:#fff;padding:10px 20px;border:none;border-radius:10px;font-weight:600;font-size:.88rem;transition:.2s}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.empty{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:.9rem}
+
+/* Forms */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-grid .full{grid-column:1/-1}
+@media(max-width:640px){.form-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:.78rem;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:.6px}
+.field input,.field textarea,.field select{padding:10px 12px;border:2px solid #e5ddd3;border-radius:8px;font-size:.9rem;font-family:inherit;transition:.2s;background:var(--warm-white)}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--primary)}
+.field textarea{resize:vertical;min-height:80px}
+.field .hint{font-size:.72rem;color:var(--text-muted);margin-top:2px}
+.checkbox-field{flex-direction:row;align-items:center;gap:10px}
+.checkbox-field input{width:18px;height:18px;accent-color:var(--primary)}
+.preview-img{max-width:120px;max-height:150px;border-radius:8px;object-fit:cover;border:1px solid #e5ddd3;background:var(--beige);margin-top:8px}
+.upload-status{font-size:.78rem;color:var(--text-muted);margin-top:6px}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(45,27,26,.55);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow-y:auto;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--warm-white);border-radius:16px;max-width:760px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.4);animation:slideUp .3s}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{padding:20px 24px;border-bottom:1px solid rgba(45,27,26,.08);display:flex;align-items:center;justify-content:space-between}
+.modal-header h2{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text-dark)}
+.modal-close{width:34px;height:34px;border-radius:50%;border:none;background:transparent;font-size:1.2rem;color:var(--text-muted);transition:.2s}
+.modal-close:hover{background:var(--cream);color:var(--text-dark)}
+.modal-body{padding:22px 24px;max-height:70vh;overflow-y:auto}
+.modal-footer{padding:16px 24px;border-top:1px solid rgba(45,27,26,.08);display:flex;gap:10px;justify-content:flex-end}
+.btn-secondary{background:transparent;color:var(--text-soft);padding:10px 20px;border:1px solid #e5ddd3;border-radius:10px;font-weight:500;font-size:.88rem;transition:.2s}
+.btn-secondary:hover{background:var(--cream)}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text-dark);color:#fff;padding:14px 22px;border-radius:10px;font-size:.9rem;font-weight:500;box-shadow:0 12px 32px rgba(0,0,0,.25);transform:translateY(120%);transition:.4s;z-index:200;max-width:340px}
+.toast.show{transform:translateY(0)}
+.toast.success{background:var(--green)}
+.toast.error{background:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="spinner"></div>
+  Loading…
+</div>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login-screen hidden">
+  <div class="login-card">
+    <div class="login-logo">✦ Silk<span>&amp;</span>Soul</div>
+    <h2>Admin Panel</h2>
+    <p>Sign in to manage your store</p>
+    <input type="email" id="emailInput" placeholder="Admin email" autocomplete="username" />
+    <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" />
+    <button id="loginBtn">Sign In →</button>
+    <div id="loginError" class="error"></div>
+    <div class="hint-box">
+      <strong>First time?</strong><br>
+      Firebase Console → Authentication → Users → <strong>"Add user"</strong> se admin account banayein, phir yahan login karein.
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <div class="sidebar-logo">✦ Silk<span>&amp;</span>Soul</div>
+    <nav>
+      <a data-view="dashboard" class="active">📊 <span class="label">Dashboard</span></a>
+      <a data-view="products">📦 <span class="label">Products</span></a>
+      <a data-view="orders">🧾 <span class="label">Orders</span></a>
+      <a data-view="inventory">📈 <span class="label">Inventory</span></a>
+      <a data-view="customers">👥 <span class="label">Customers</span></a>
+      <a data-view="settings">⚙️ <span class="label">Settings</span></a>
+    </nav>
+    <button class="logout-btn" id="logoutBtn">Logout</button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1 id="pageTitle">Dashboard</h1>
+      <div class="topbar-actions">
+        <span class="user-email" id="userEmail"></span>
+        <a href="/" target="_blank" class="btn-ghost">View Store ↗</a>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <section id="view-dashboard" class="view">
+        <div id="statsGrid" class="stats"></div>
+        <div class="card" style="margin-bottom:24px">
+          <div class="card-header">
+            <h3>Recent Orders</h3>
+            <a href="#" data-view-link="orders" class="btn-ghost">View All →</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+              <tbody id="recentOrdersBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>⚠️ Low Stock</h3>
+            <a href="#" data-view-link="inventory" class="btn-ghost">Manage →</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Product</th><th>Category</th><th>Stock</th><th>Price</th></tr></thead>
+              <tbody id="lowStockBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRODUCTS -->
+      <section id="view-products" class="view hidden">
+        <div class="card">
+          <div class="card-header">
+            <h3>All Products</h3>
+            <button class="btn-primary" id="addProductBtn">+ Add Product</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Image</th><th>Product</th><th>Category</th><th>Price</th>
+                  <th>Stock</th><th>Slug</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="productsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ORDERS -->
+      <section id="view-orders" class="view hidden">
+        <div class="card">
+          <div class="card-header">
+            <h3>All Orders</h3>
+            <button class="btn-primary" id="testOrderBtn">+ Create Test Order</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th>
+                <th>Status</th><th>Date</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="ordersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- INVENTORY -->
+      <section id="view-inventory" class="view hidden">
+        <div class="card">
+          <div class="card-header"><h3>Inventory Management</h3></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Product</th><th>Category</th><th>Stock</th><th>Status</th>
+                <th>Quick Adjust</th></tr>
+              </thead>
+              <tbody id="inventoryBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- CUSTOMERS -->
+      <section id="view-customers" class="view hidden">
+        <div class="card">
+          <div class="card-header"><h3>Customers (from Orders)</h3></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Phone</th><th>Orders</th>
+                <th>Total Spent</th><th>Last Order</th></tr>
+              </thead>
+              <tbody id="customersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="view-settings" class="view hidden">
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header"><h3>Store Info</h3></div>
+          <div class="card-body">
+            <div class="field" style="margin-bottom:16px">
+              <label>Store Name</label>
+              <input type="text" value="Silk &amp; Soul" readonly />
+            </div>
+            <div class="field" style="margin-bottom:16px">
+              <label>Firebase Project</label>
+              <input type="text" value="silk-and-soul" readonly />
+            </div>
+            <div class="field" style="margin-bottom:16px">
+              <label>Logged In As</label>
+              <input type="text" id="settingsEmail" readonly />
+            </div>
+            <div class="hint-box" style="margin-top:4px">
+              <strong>Firebase Rules:</strong> Firestore me products read sab kar sakte hain, write sirf authenticated users. Admin add karne ke liye: Firebase Console → Authentication → Users → Add user.
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Danger Zone</h3></div>
+          <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="btn-secondary" id="logoutBtn2">🚪 Logout</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div id="productModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Add Product</h2>
+      <button class="modal-close" id="modalCloseBtn">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="productForm" class="form-grid">
+        <input type="hidden" id="f-id" />
+        <div class="field full">
+          <label>Product Name *</label>
+          <input type="text" id="f-name" required placeholder="Mysore Silk Crepe" />
+        </div>
+        <div class="field full">
+          <label>Slug (URL)</label>
+          <input type="text" id="f-slug" placeholder="mysore-silk-crepe" />
+          <div class="hint">Preview: <code id="slugPreview">/products/...</code> — auto-generate hota hai, override kar sakte hain.</div>
+        </div>
+        <div class="field">
+          <label>Variant</label>
+          <input type="text" id="f-variant" placeholder="Pure Silk · Burgundy Wine" />
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <select id="f-category">
+            <option value="cotton">Cotton Comfort</option>
+            <option value="silk">Silk Luxe</option>
+            <option value="georgette">Georgette &amp; Chiffon</option>
+            <option value="designer">Designer Drapes</option>
+            <option value="general" selected>General</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Price (₹) *</label>
+          <input type="number" id="f-price" min="0" required placeholder="16365" />
+        </div>
+        <div class="field">
+          <label>Old Price (₹)</label>
+          <input type="number" id="f-oldPrice" min="0" placeholder="18999" />
+        </div>
+        <div class="field">
+          <label>Stock</label>
+          <input type="number" id="f-stock" min="0" value="10" />
+        </div>
+        <div class="field">
+          <label>Tag (optional)</label>
+          <input type="text" id="f-tag" placeholder="Bestseller / New / Top Rated" />
+        </div>
+        <div class="field">
+          <label>Rating (0–5)</label>
+          <input type="number" id="f-rating" min="0" max="5" step="0.1" value="5" />
+        </div>
+        <div class="field">
+          <label>Reviews Count</label>
+          <input type="number" id="f-reviews" min="0" value="0" />
+        </div>
+        <div class="field full">
+          <label>Image URL</label>
+          <input type="text" id="f-image" placeholder="https://..." />
+          <div class="hint">Firebase Storage ya koi bhi public image URL paste karein.</div>
+        </div>
+        <div class="field full">
+          <label>Or Upload Image (Firebase Storage)</label>
+          <input type="file" id="f-file" accept="image/*" />
+          <div class="upload-status" id="uploadStatus"></div>
+          <div id="imgPreviewWrap"></div>
+        </div>
+        <div class="field full">
+          <label>Description</label>
+          <textarea id="f-description" placeholder="Handcrafted silk saree with timeless elegance..."></textarea>
+        </div>
+        <div class="field full checkbox-field">
+          <input type="checkbox" id="f-featured" checked />
+          <label style="text-transform:none;letter-spacing:0;font-size:.9rem;color:var(--text-soft)">Show on Home Page (Featured)</label>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" id="modalCancelBtn">Cancel</button>
+      <button class="btn-primary" id="modalSaveBtn">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script type="module">
+/* =========================================================
+   FIREBASE IMPORTS
+   ========================================================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc,
+  doc, query, where, orderBy, limit, serverTimestamp, getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getStorage, ref as storageRef, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+/* =========================================================
+   FIREBASE CONFIG
+   ========================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyAV_cCJFySKWCfY3zPsZMkb5Oau9BAQNlc",
+  authDomain: "silk-and-soul.firebaseapp.com",
+  projectId: "silk-and-soul",
+  storageBucket: "silk-and-soul.firebasestorage.app",
+  messagingSenderId: "925303527952",
+  appId: "1:925303527952:web:111e2a00f85cb9859e4895",
+  measurementId: "G-VQEPZK9BYX"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const storage = getStorage(app);
+
+/* =========================================================
+   STATE
+   ========================================================= */
+const state = {
+  user: null,
+  products: [],
+  orders: [],
+  customers: [],
+  stats: {},
+  currentView: 'dashboard',
+  editingProductId: null,
+  slugManuallyEdited: false,
+};
+
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+
+/* =========================================================
+   UTILS
+   ========================================================= */
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+function slugify(s) {
+  return String(s || '').toLowerCase().trim()
+    .replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
+}
+function fmtDate(ts) {
+  if (!ts) return '—';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+function fmtMoney(n) { return '₹' + Number(n || 0).toLocaleString('en-IN'); }
+
+let toastTimer;
+function toast(msg, type = '') {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* =========================================================
+   AUTH
+   ========================================================= */
+onAuthStateChanged(auth, (user) => {
+  $('#loadingScreen').classList.add('hidden');
+  if (user) {
+    state.user = user;
+    $('#loginScreen').classList.add('hidden');
+    $('#app').classList.remove('hidden');
+    $('#userEmail').textContent = user.email || '';
+    $('#settingsEmail').value = user.email || '';
+    refreshAll();
+  } else {
+    state.user = null;
+    $('#app').classList.add('hidden');
+    $('#loginScreen').classList.remove('hidden');
+  }
+});
+
+async function handleLogin() {
+  const email = $('#emailInput').value.trim();
+  const pass = $('#passwordInput').value;
+  if (!email || !pass) { $('#loginError').textContent = 'Email and password required'; return; }
+  $('#loginBtn').disabled = true;
+  $('#loginBtn').textContent = 'Signing in…';
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    $('#loginError').textContent = '';
+  } catch (e) {
+    $('#loginError').textContent = e.message.replace('Firebase: ', '');
+  } finally {
+    $('#loginBtn').disabled = false;
+    $('#loginBtn').textContent = 'Sign In →';
+  }
+}
+
+async function handleLogout() {
+  await signOut(auth);
+  $('#emailInput').value = '';
+  $('#passwordInput').value = '';
+}
+
+/* =========================================================
+   VIEW SWITCH
+   ========================================================= */
+function switchView(view) {
+  state.currentView = view;
+  $$('.view').forEach(v => v.classList.add('hidden'));
+  const el = $('#view-' + view);
+  if (el) el.classList.remove('hidden');
+  $$('.sidebar nav a').forEach(a => a.classList.toggle('active', a.dataset.view === view));
+  const titles = {
+    dashboard: 'Dashboard', products: 'Products', orders: 'Orders',
+    inventory: 'Inventory', customers: 'Customers', settings: 'Settings',
+  };
+  $('#pageTitle').textContent = titles[view] || 'Admin';
+  if (view === 'products') renderProducts();
+  if (view === 'orders') renderOrders();
+  if (view === 'inventory') renderInventory();
+  if (view === 'customers') renderCustomers();
+  if (view === 'dashboard') renderDashboard();
+}
+
+/* =========================================================
+   DATA LOADERS
+   ========================================================= */
+async function refreshAll() {
+  try {
+    const [prodSnap, ordSnap] = await Promise.all([
+      getDocs(collection(db, 'products')),
+      getDocs(collection(db, 'orders'))
+    ]);
+    state.products = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    state.orders = ordSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // sort
+    state.products.sort((a, b) => {
+      const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+      const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+      return tb - ta;
+    });
+    state.orders.sort((a, b) => {
+      const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+      const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+      return tb - ta;
+    });
+
+    computeStats();
+    renderStats();
+    renderLowStock();
+    renderRecentOrders();
+    switchView(state.currentView);
+  } catch (e) {
+    console.error(e);
+    toast('Failed to load data: ' + e.message, 'error');
+  }
+}
+
+function computeStats() {
+  const products = state.products;
+  const orders = state.orders;
+  const revenue = orders
+    .filter(o => o.status !== 'cancelled')
+    .reduce((s, o) => s + Number(o.total || 0), 0);
+  const emails = new Set(orders.map(o => (o.customer && o.customer.email) || '').filter(Boolean));
+  state.stats = {
+    totalProducts: products.length,
+    totalOrders: orders.length,
+    revenue,
+    pendingOrders: orders.filter(o => o.status === 'pending').length,
+    lowStock: products.filter(p => Number(p.stock || 0) < 5).length,
+    customers: emails.size,
+  };
+  // customers derived
+  const map = new Map();
+  for (const o of orders) {
+    const c = o.customer || {};
+    const email = (c.email || '').toLowerCase() || ('guest-' + o.id);
+    if (!map.has(email)) {
+      map.set(email, {
+        name: c.name || 'Guest',
+        email: c.email || '—',
+        phone: c.phone || '—',
+        orders: 0, totalSpent: 0, lastOrder: 0,
+      });
+    }
+    const e = map.get(email);
+    e.orders += 1;
+    e.totalSpent += Number(o.total) || 0;
+    const ts = o.createdAt?.toMillis ? o.createdAt.toMillis() : 0;
+    if (ts > e.lastOrder) e.lastOrder = ts;
+  }
+  state.customers = Array.from(map.values()).sort((a, b) => b.lastOrder - a.lastOrder);
+}
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+function renderStats() {
+  const s = state.stats;
+  const cards = [
+    { label: 'Total Revenue', value: fmtMoney(s.revenue), sub: `${s.totalOrders || 0} orders` },
+    { label: 'Total Products', value: s.totalProducts || 0, sub: `${s.lowStock || 0} low stock` },
+    { label: 'Pending Orders', value: s.pendingOrders || 0, sub: 'Needs attention' },
+    { label: 'Customers', value: s.customers || 0, sub: 'Unique buyers' },
+  ];
+  $('#statsGrid').innerHTML = cards.map(c => `
+    <div class="stat">
+      <div class="label">${c.label}</div>
+      <div class="value">${c.value}</div>
+      <div class="sub">${c.sub}</div>
+    </div>
+  `).join('');
+}
+
+function renderRecentOrders() {
+  const recent = state.orders.slice(0, 6);
+  const tbody = $('#recentOrdersBody');
+  if (!recent.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">No orders yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = recent.map(o => `
+    <tr>
+      <td><strong>${esc(o.orderId || o.id)}</strong></td>
+      <td>${esc((o.customer && o.customer.name) || 'Guest')}</td>
+      <td class="cell-price">${fmtMoney(o.total)}</td>
+      <td><span class="badge badge-${o.status || 'pending'}">${o.status || 'pending'}</span></td>
+      <td>${fmtDate(o.createdAt)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderLowStock() {
+  const low = state.products.filter(p => Number(p.stock || 0) < 5).slice(0, 8);
+  const tbody = $('#lowStockBody');
+  if (!tbody) return;
+  if (!low.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">All products are well stocked ✓</td></tr>';
+    return;
+  }
+  tbody.innerHTML = low.map(p => {
+    const st = Number(p.stock || 0);
+    const cls = st === 0 ? 'out' : 'low';
+    return `
+      <tr>
+        <td class="cell-name">${esc(p.name)}</td>
+        <td>${esc(p.category || '—')}</td>
+        <td><span class="badge badge-stock-${cls}">${st}</span></td>
+        <td class="cell-price">${fmtMoney(p.price)}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderDashboard() {
+  renderStats();
+  renderRecentOrders();
+  renderLowStock();
+}
+
+/* =========================================================
+   PRODUCTS
+   ========================================================= */
+function renderProducts() {
+  const tbody = $('#productsBody');
+  if (!state.products.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">No products yet. Click "+ Add Product" to get started.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.products.map(p => `
+    <tr>
+      <td><img class="thumb" src="${esc(p.image || '')}" alt="" onerror="this.style.opacity=.2" /></td>
+      <td>
+        <div class="cell-name">${esc(p.name)}</div>
+        <div class="cell-sub">${esc(p.variant || '')}</div>
+      </td>
+      <td>${esc(p.category || '—')}</td>
+      <td class="cell-price">${fmtMoney(p.price)}</td>
+      <td>${Number(p.stock) || 0}</td>
+      <td><code style="font-size:.75rem;color:var(--text-muted)">/products/${esc(p.slug || p.id)}</code></td>
+      <td>
+        <div class="actions">
+          <a class="icon-btn" href="/products/${esc(p.slug || p.id)}" target="_blank" title="View">👁</a>
+          <button class="icon-btn" data-edit-id="${esc(p.id)}" title="Edit">✎</button>
+          <button class="icon-btn danger" data-del-id="${esc(p.id)}" title="Delete">🗑</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  // Bind edit/delete
+  tbody.querySelectorAll('[data-edit-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = state.products.find(x => x.id === btn.dataset.editId);
+      if (p) openProductModal(p);
+    });
+  });
+  tbody.querySelectorAll('[data-del-id]').forEach(btn => {
+    btn.addEventListener('click', () => deleteProduct(btn.dataset.delId));
+  });
+}
+
+function openProductModal(product) {
+  state.editingProductId = product ? product.id : null;
+  state.slugManuallyEdited = !!(product && product.slug);
+  $('#modalTitle').textContent = product ? 'Edit Product' : 'Add Product';
+  $('#f-id').value = product ? product.id : '';
+  $('#f-name').value = product ? product.name : '';
+  $('#f-slug').value = product ? (product.slug || '') : '';
+  $('#f-variant').value = product ? (product.variant || '') : '';
+  $('#f-category').value = product ? (product.category || 'general') : 'general';
+  $('#f-price').value = product ? product.price : '';
+  $('#f-oldPrice').value = product ? (product.oldPrice || '') : '';
+  $('#f-stock').value = product ? (product.stock || 0) : 10;
+  $('#f-tag').value = product ? (product.tag || '') : '';
+  $('#f-rating').value = product ? (product.rating || 5) : 5;
+  $('#f-reviews').value = product ? (product.reviews || 0) : 0;
+  $('#f-image').value = product ? (product.image || '') : '';
+  $('#f-description').value = product ? (product.description || '') : '';
+  $('#f-featured').checked = product ? product.featured !== false : true;
+  $('#f-file').value = '';
+  $('#uploadStatus').textContent = '';
+  updateSlugPreview();
+  updateImgPreview();
+  $('#productModal').classList.remove('hidden');
+}
+
+function closeProductModal() {
+  $('#productModal').classList.add('hidden');
+  state.editingProductId = null;
+}
+
+function updateSlugPreview() {
+  const name = $('#f-name').value.trim();
+  let slug = $('#f-slug').value.trim();
+  if (!state.slugManuallyEdited) {
+    slug = slugify(name);
+    $('#f-slug').value = slug;
+  }
+  $('#slugPreview').textContent = '/products/' + (slug || '...');
+}
+
+function updateImgPreview() {
+  const url = $('#f-image').value.trim();
+  const wrap = $('#imgPreviewWrap');
+  if (url) wrap.innerHTML = `<img class="preview-img" src="${esc(url)}" onerror="this.style.display='none'" />`;
+  else wrap.innerHTML = '';
+}
+
+async function ensureUniqueSlug(baseSlug, excludeId) {
+  let slug = baseSlug || 'product';
+  let n = 1;
+  while (true) {
+    const q = query(collection(db, 'products'), where('slug', '==', slug), limit(2));
+    const snap = await getDocs(q);
+    const conflict = snap.docs.find(d => d.id !== excludeId);
+    if (!conflict) return slug;
+    slug = `${baseSlug}-${n++}`;
+  }
+}
+
+async function uploadImageFile(file, slug) {
+  const cleanName = file.name.replace(/[^\w.-]/g, '_');
+  const path = `products/${slug}/${Date.now()}-${cleanName}`;
+  const ref = storageRef(storage, path);
+  await uploadBytes(ref, file, { contentType: file.type });
+  return await getDownloadURL(ref);
+}
+
+async function saveProduct() {
+  const id = state.editingProductId;
+  const btn = $('#modalSaveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    const name = $('#f-name').value.trim();
+    if (!name) throw new Error('Product name required');
+    const price = Number($('#f-price').value);
+    if (!price || price <= 0) throw new Error('Valid price required');
+
+    const baseSlug = slugify($('#f-slug').value.trim() || name);
+    const slug = await ensureUniqueSlug(baseSlug, id);
+
+    // Image handling
+    let image = $('#f-image').value.trim();
+    const file = $('#f-file').files[0];
+    if (file) {
+      $('#uploadStatus').textContent = 'Uploading image…';
+      image = await uploadImageFile(file, slug);
+      $('#uploadStatus').textContent = '✓ Uploaded';
+    }
+
+    const payload = {
+      name,
+      slug,
+      variant: $('#f-variant').value.trim(),
+      category: $('#f-category').value,
+      price,
+      oldPrice: Number($('#f-oldPrice').value) || 0,
+      stock: Number($('#f-stock').value) || 0,
+      tag: $('#f-tag').value.trim(),
+      rating: Number($('#f-rating').value) || 5,
+      reviews: Number($('#f-reviews').value) || 0,
+      image,
+      description: $('#f-description').value.trim(),
+      featured: $('#f-featured').checked,
+      updatedAt: serverTimestamp(),
+    };
+
+    if (id) {
+      await updateDoc(doc(db, 'products', id), payload);
+      toast('Product updated ✓', 'success');
+    } else {
+      payload.createdAt = serverTimestamp();
+      await addDoc(collection(db, 'products'), payload);
+      toast('Product added ✓', 'success');
+    }
+
+    closeProductModal();
+    await refreshAll();
+  } catch (e) {
+    console.error(e);
+    toast(e.message || 'Save failed', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save Product';
+  }
+}
+
+async function deleteProduct(id) {
+  if (!confirm('Delete this product? This cannot be undone.')) return;
+  try {
+    await deleteDoc(doc(db, 'products', id));
+    toast('Product deleted', 'success');
+    await refreshAll();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+/* =========================================================
+   ORDERS
+   ========================================================= */
+function renderOrders() {
+  const tbody = $('#ordersBody');
+  if (!state.orders.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">No orders yet. Click "+ Create Test Order" to test.</td></tr>';
+    return;
+  }
+  const statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+  tbody.innerHTML = state.orders.map(o => `
+    <tr>
+      <td><strong>${esc(o.orderId || o.id.slice(0, 10))}</strong></td>
+      <td>
+        <div class="cell-name">${esc((o.customer && o.customer.name) || 'Guest')}</div>
+        <div class="cell-sub">${esc((o.customer && o.customer.email) || '')}</div>
+      </td>
+      <td>${(o.items || []).length}</td>
+      <td class="cell-price">${fmtMoney(o.total)}</td>
+      <td>
+        <select data-order-id="${esc(o.id)}" style="padding:6px 10px;border:1px solid #e5ddd3;border-radius:8px;font-family:inherit;font-size:.82rem">
+          ${statuses.map(s => `<option value="${s}" ${o.status === s ? 'selected' : ''}>${s[0].toUpperCase() + s.slice(1)}</option>`).join('')}
+        </select>
+      </td>
+      <td>${fmtDate(o.createdAt)}</td>
+      <td>
+        <div class="actions">
+          <button class="icon-btn danger" data-del-order="${esc(o.id)}" title="Delete">🗑</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('select[data-order-id]').forEach(sel => {
+    sel.addEventListener('change', () => updateOrderStatus(sel.dataset.orderId, sel.value));
+  });
+  tbody.querySelectorAll('[data-del-order]').forEach(btn => {
+    btn.addEventListener('click', () => deleteOrder(btn.dataset.delOrder));
+  });
+}
+
+async function updateOrderStatus(id, status) {
+  try {
+    await updateDoc(doc(db, 'orders', id), { status, updatedAt: serverTimestamp() });
+    toast('Order status updated ✓', 'success');
+    const o = state.orders.find(x => x.id === id);
+    if (o) o.status = status;
+    computeStats();
+    renderStats();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+async function deleteOrder(id) {
+  if (!confirm('Delete this order?')) return;
+  try {
+    await deleteDoc(doc(db, 'orders', id));
+    toast('Order deleted', 'success');
+    await refreshAll();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+async function createTestOrder() {
+  const sampleProducts = state.products.slice(0, 2);
+  if (!sampleProducts.length) {
+    toast('Add at least one product first', 'error');
+    return;
+  }
+  const items = sampleProducts.map(p => ({
+    id: p.id,
+    name: p.name,
+    variant: p.variant || '',
+    price: Number(p.price) || 0,
+    image: p.image || '',
+    quantity: 1,
+  }));
+  const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const shipping = subtotal > 999 ? 0 : 79;
+  const order = {
+    orderId: 'ORD-' + Date.now().toString(36).toUpperCase(),
+    customer: {
+      name: 'Test Customer',
+      email: 'test@example.com',
+      phone: '+91 9876543210',
+      address: '123 Test Street, Mumbai, India',
+    },
+    items,
+    subtotal,
+    shipping,
+    total: subtotal + shipping,
+    paymentMethod: 'cod',
+    status: 'pending',
+    createdAt: serverTimestamp(),
+  };
+  try {
+    await addDoc(collection(db, 'orders'), order);
+    toast('Test order created ✓', 'success');
+    await refreshAll();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+/* =========================================================
+   INVENTORY
+   ========================================================= */
+function renderInventory() {
+  const tbody = $('#inventoryBody');
+  if (!state.products.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">No products yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.products.map(p => {
+    const stock = Number(p.stock) || 0;
+    const cls = stock === 0 ? 'out' : stock < 5 ? 'low' : 'in';
+    const label = stock === 0 ? 'Out of Stock' : stock < 5 ? 'Low Stock' : 'In Stock';
+    return `
+      <tr>
+        <td>
+          <div class="cell-name">${esc(p.name)}</div>
+          <div class="cell-sub">${esc(p.variant || '')}</div>
+        </td>
+        <td>${esc(p.category || '—')}</td>
+        <td><strong>${stock}</strong></td>
+        <td><span class="badge badge-stock-${cls}">${label}</span></td>
+        <td>
+          <div class="actions">
+            <button class="icon-btn" data-adjust-id="${esc(p.id)}" data-delta="-1">−</button>
+            <button class="icon-btn" data-adjust-id="${esc(p.id)}" data-delta="1">+</button>
+            <button class="icon-btn" data-set-id="${esc(p.id)}">✎</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  tbody.querySelectorAll('[data-adjust-id]').forEach(btn => {
+    btn.addEventListener('click', () => adjustStock(btn.dataset.adjustId, Number(btn.dataset.delta)));
+  });
+  tbody.querySelectorAll('[data-set-id]').forEach(btn => {
+    btn.addEventListener('click', () => setStock(btn.dataset.setId));
+  });
+}
+
+async function adjustStock(id, delta) {
+  const p = state.products.find(x => x.id === id);
+  if (!p) return;
+  const newStock = Math.max(0, (Number(p.stock) || 0) + delta);
+  try {
+    await updateDoc(doc(db, 'products', id), { stock: newStock, updatedAt: serverTimestamp() });
+    p.stock = newStock;
+    renderInventory();
+    renderLowStock();
+    computeStats();
+    renderStats();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+async function setStock(id) {
+  const p = state.products.find(x => x.id === id);
+  if (!p) return;
+  const val = prompt(`New stock for "${p.name}":`, p.stock || 0);
+  if (val === null) return;
+  const num = Math.max(0, parseInt(val) || 0);
+  try {
+    await updateDoc(doc(db, 'products', id), { stock: num, updatedAt: serverTimestamp() });
+    p.stock = num;
+    renderInventory();
+    renderLowStock();
+    computeStats();
+    renderStats();
+    toast('Stock updated', 'success');
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+/* =========================================================
+   CUSTOMERS
+   ========================================================= */
+function renderCustomers() {
+  const tbody = $('#customersBody');
+  if (!state.customers.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">No customers yet (orders create customers automatically).</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.customers.map(c => `
+    <tr>
+      <td class="cell-name">${esc(c.name)}</td>
+      <td>${esc(c.email)}</td>
+      <td>${esc(c.phone)}</td>
+      <td>${c.orders}</td>
+      <td class="cell-price">${fmtMoney(c.totalSpent)}</td>
+      <td>${c.lastOrder ? fmtDate(c.lastOrder) : '—'}</td>
+    </tr>
+  `).join('');
+}
+
+/* =========================================================
+   EVENT BINDINGS
+   ========================================================= */
+function bindEvents() {
+  $('#loginBtn').addEventListener('click', handleLogin);
+  $('#emailInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('#passwordInput').focus(); });
+  $('#passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+  $('#logoutBtn').addEventListener('click', handleLogout);
+  const lb2 = $('#logoutBtn2'); if (lb2) lb2.addEventListener('click', handleLogout);
+
+  $$('.sidebar nav a').forEach(a => {
+    a.addEventListener('click', () => switchView(a.dataset.view));
+  });
+  $$('[data-view-link]').forEach(a => {
+    a.addEventListener('click', (e) => { e.preventDefault(); switchView(a.dataset.viewLink); });
+  });
+
+  $('#addProductBtn').addEventListener('click', () => openProductModal(null));
+  $('#modalCloseBtn').addEventListener('click', closeProductModal);
+  $('#modalCancelBtn').addEventListener('click', closeProductModal);
+  $('#modalSaveBtn').addEventListener('click', saveProduct);
+  $('#productForm').addEventListener('submit', (e) => { e.preventDefault(); saveProduct(); });
+
+  $('#f-name').addEventListener('input', updateSlugPreview);
+  $('#f-slug').addEventListener('input', () => { state.slugManuallyEdited = true; updateSlugPreview(); });
+  $('#f-image').addEventListener('input', updateImgPreview);
+
+  $('#f-file').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast('Image 5MB se choti honi chahiye', 'error');
+      e.target.value = '';
+      return;
+    }
+    $('#uploadStatus').textContent = `Selected: ${file.name} (${(file.size/1024).toFixed(0)} KB) — Save par upload hoga`;
+  });
+
+  $('#productModal').addEventListener('click', (e) => {
+    if (e.target.id === 'productModal') closeProductModal();
+  });
+
+  $('#testOrderBtn').addEventListener('click', createTestOrder);
+}
+
+bindEvents();
+console.log('✦ Silk & Soul Admin ready');
+</script>
+</body>
+</html>
