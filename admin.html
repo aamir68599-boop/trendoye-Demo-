@@ -584,7 +584,6 @@ async function refreshAll() {
     state.products = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     state.orders = ordSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    // sort
     state.products.sort((a, b) => {
       const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
       const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
@@ -610,9 +609,7 @@ async function refreshAll() {
 function computeStats() {
   const products = state.products;
   const orders = state.orders;
-  const revenue = orders
-    .filter(o => o.status !== 'cancelled')
-    .reduce((s, o) => s + Number(o.total || 0), 0);
+  const revenue = orders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + Number(o.total || 0), 0);
   const emails = new Set(orders.map(o => (o.customer && o.customer.email) || '').filter(Boolean));
   state.stats = {
     totalProducts: products.length,
@@ -622,18 +619,12 @@ function computeStats() {
     lowStock: products.filter(p => Number(p.stock || 0) < 5).length,
     customers: emails.size,
   };
-  // customers derived
   const map = new Map();
   for (const o of orders) {
     const c = o.customer || {};
     const email = (c.email || '').toLowerCase() || ('guest-' + o.id);
     if (!map.has(email)) {
-      map.set(email, {
-        name: c.name || 'Guest',
-        email: c.email || '—',
-        phone: c.phone || '—',
-        orders: 0, totalSpent: 0, lastOrder: 0,
-      });
+      map.set(email, { name: c.name || 'Guest', email: c.email || '—', phone: c.phone || '—', orders: 0, totalSpent: 0, lastOrder: 0 });
     }
     const e = map.get(email);
     e.orders += 1;
@@ -740,7 +731,6 @@ function renderProducts() {
     </tr>
   `).join('');
 
-  // Bind edit/delete
   tbody.querySelectorAll('[data-edit-id]').forEach(btn => {
     btn.addEventListener('click', () => {
       const p = state.products.find(x => x.id === btn.dataset.editId);
@@ -834,7 +824,6 @@ async function saveProduct() {
     const baseSlug = slugify($('#f-slug').value.trim() || name);
     const slug = await ensureUniqueSlug(baseSlug, id);
 
-    // Image handling
     let image = $('#f-image').value.trim();
     const file = $('#f-file').files[0];
     if (file) {
@@ -844,20 +833,10 @@ async function saveProduct() {
     }
 
     const payload = {
-      name,
-      slug,
-      variant: $('#f-variant').value.trim(),
-      category: $('#f-category').value,
-      price,
-      oldPrice: Number($('#f-oldPrice').value) || 0,
-      stock: Number($('#f-stock').value) || 0,
-      tag: $('#f-tag').value.trim(),
-      rating: Number($('#f-rating').value) || 5,
-      reviews: Number($('#f-reviews').value) || 0,
-      image,
-      description: $('#f-description').value.trim(),
-      featured: $('#f-featured').checked,
-      updatedAt: serverTimestamp(),
+      name, slug, variant: $('#f-variant').value.trim(), category: $('#f-category').value,
+      price, oldPrice: Number($('#f-oldPrice').value) || 0, stock: Number($('#f-stock').value) || 0,
+      tag: $('#f-tag').value.trim(), rating: Number($('#f-rating').value) || 5, reviews: Number($('#f-reviews').value) || 0,
+      image, description: $('#f-description').value.trim(), featured: $('#f-featured').checked, updatedAt: serverTimestamp(),
     };
 
     if (id) {
@@ -886,9 +865,7 @@ async function deleteProduct(id) {
     await deleteDoc(doc(db, 'products', id));
     toast('Product deleted', 'success');
     await refreshAll();
-  } catch (e) {
-    toast(e.message, 'error');
-  }
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 /* =========================================================
@@ -938,11 +915,8 @@ async function updateOrderStatus(id, status) {
     toast('Order status updated ✓', 'success');
     const o = state.orders.find(x => x.id === id);
     if (o) o.status = status;
-    computeStats();
-    renderStats();
-  } catch (e) {
-    toast(e.message, 'error');
-  }
+    computeStats(); renderStats();
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 async function deleteOrder(id) {
@@ -951,50 +925,27 @@ async function deleteOrder(id) {
     await deleteDoc(doc(db, 'orders', id));
     toast('Order deleted', 'success');
     await refreshAll();
-  } catch (e) {
-    toast(e.message, 'error');
-  }
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 async function createTestOrder() {
   const sampleProducts = state.products.slice(0, 2);
-  if (!sampleProducts.length) {
-    toast('Add at least one product first', 'error');
-    return;
-  }
+  if (!sampleProducts.length) { toast('Add at least one product first', 'error'); return; }
   const items = sampleProducts.map(p => ({
-    id: p.id,
-    name: p.name,
-    variant: p.variant || '',
-    price: Number(p.price) || 0,
-    image: p.image || '',
-    quantity: 1,
+    id: p.id, name: p.name, variant: p.variant || '', price: Number(p.price) || 0, image: p.image || '', quantity: 1,
   }));
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
   const shipping = subtotal > 999 ? 0 : 79;
   const order = {
     orderId: 'ORD-' + Date.now().toString(36).toUpperCase(),
-    customer: {
-      name: 'Test Customer',
-      email: 'test@example.com',
-      phone: '+91 9876543210',
-      address: '123 Test Street, Mumbai, India',
-    },
-    items,
-    subtotal,
-    shipping,
-    total: subtotal + shipping,
-    paymentMethod: 'cod',
-    status: 'pending',
-    createdAt: serverTimestamp(),
+    customer: { name: 'Test Customer', email: 'test@example.com', phone: '+91 9876543210', address: '123 Test Street, Mumbai, India' },
+    items, subtotal, shipping, total: subtotal + shipping, paymentMethod: 'cod', status: 'pending', createdAt: serverTimestamp(),
   };
   try {
     await addDoc(collection(db, 'orders'), order);
     toast('Test order created ✓', 'success');
     await refreshAll();
-  } catch (e) {
-    toast(e.message, 'error');
-  }
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 /* =========================================================
@@ -1012,10 +963,7 @@ function renderInventory() {
     const label = stock === 0 ? 'Out of Stock' : stock < 5 ? 'Low Stock' : 'In Stock';
     return `
       <tr>
-        <td>
-          <div class="cell-name">${esc(p.name)}</div>
-          <div class="cell-sub">${esc(p.variant || '')}</div>
-        </td>
+        <td><div class="cell-name">${esc(p.name)}</div><div class="cell-sub">${esc(p.variant || '')}</div></td>
         <td>${esc(p.category || '—')}</td>
         <td><strong>${stock}</strong></td>
         <td><span class="badge badge-stock-${cls}">${label}</span></td>
@@ -1045,13 +993,8 @@ async function adjustStock(id, delta) {
   try {
     await updateDoc(doc(db, 'products', id), { stock: newStock, updatedAt: serverTimestamp() });
     p.stock = newStock;
-    renderInventory();
-    renderLowStock();
-    computeStats();
-    renderStats();
-  } catch (e) {
-    toast(e.message, 'error');
-  }
+    renderInventory(); renderLowStock(); computeStats(); renderStats();
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 async function setStock(id) {
@@ -1063,14 +1006,9 @@ async function setStock(id) {
   try {
     await updateDoc(doc(db, 'products', id), { stock: num, updatedAt: serverTimestamp() });
     p.stock = num;
-    renderInventory();
-    renderLowStock();
-    computeStats();
-    renderStats();
+    renderInventory(); renderLowStock(); computeStats(); renderStats();
     toast('Stock updated', 'success');
-  } catch (e) {
-    toast(e.message, 'error');
-  }
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 /* =========================================================
