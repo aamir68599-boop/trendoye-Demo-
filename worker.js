@@ -3,8 +3,7 @@
  * ---------------------------------------------------------
  * Routes:
  *   GET /products/:slug  → Firestore se product laata hai aur SEO page render karta hai
- *   GET /admin or /admin/ → admin.html serve karta hai
- *   /*                    → static assets
+ *   /*                    → static assets (including /admin via _redirects)
  */
 
 const FS_BASE = 'https://firestore.googleapis.com/v1';
@@ -225,13 +224,7 @@ export default {
         });
       }
 
-      // Admin page rewrite
-      if (path === '/admin' || path === '/admin/') {
-        const adminUrl = new URL('/admin.html', url).toString();
-        return env.ASSETS.fetch(new Request(adminUrl, request));
-      }
-
-      // Everything else → static
+      // Everything else → static assets (including /admin via _redirects)
       return env.ASSETS.fetch(request);
     } catch (err) {
       return new Response('Server error: ' + (err.message || 'unknown'), { status: 500 });
