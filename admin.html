@@ -44,7 +44,7 @@ code{background:#f0e8de;padding:1px 6px;border-radius:4px;font-size:.85em}
 .hint-box{margin-top:20px;padding:12px 16px;background:#F4EDE0;border-radius:8px;font-size:.78rem;color:var(--text-soft);line-height:1.6}
 .hint-box strong{color:var(--primary)}
 
-/* App Layout */
+/* App */
 .app{display:flex;min-height:100vh}
 .sidebar{width:250px;background:var(--sidebar-bg);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:50;transition:.3s}
 .sidebar-logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;padding:24px 22px;border-bottom:1px solid rgba(255,255,255,.08);color:#fff}
@@ -79,7 +79,7 @@ code{background:#f0e8de;padding:1px 6px;border-radius:4px;font-size:.85em}
   .user-email{display:none}
 }
 
-/* Cards & Stats */
+/* Cards */
 .card{background:var(--warm-white);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid rgba(45,27,26,.05);overflow:hidden}
 .card-header{padding:18px 22px;border-bottom:1px solid rgba(45,27,26,.06);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .card-header h3{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--text-dark)}
@@ -93,7 +93,6 @@ code{background:#f0e8de;padding:1px 6px;border-radius:4px;font-size:.85em}
 .stat .value{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--text-dark);line-height:1.1}
 .stat .sub{font-size:.8rem;color:var(--text-muted);margin-top:6px}
 
-/* Tables */
 table{width:100%;border-collapse:collapse;font-size:.88rem}
 table th{text-align:left;padding:12px 10px;font-weight:600;color:var(--text-muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid rgba(45,27,26,.08);white-space:nowrap}
 table td{padding:14px 10px;border-bottom:1px solid rgba(45,27,26,.05);color:var(--text-soft);vertical-align:middle}
@@ -122,7 +121,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
 .btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
 .empty{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:.9rem}
 
-/* Forms & Modals */
+/* Forms */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .form-grid .full{grid-column:1/-1}
 @media(max-width:640px){.form-grid{grid-template-columns:1fr}}
@@ -137,6 +136,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
 .preview-img{max-width:120px;max-height:150px;border-radius:8px;object-fit:cover;border:1px solid #e5ddd3;background:var(--beige);margin-top:8px}
 .upload-status{font-size:.78rem;color:var(--text-muted);margin-top:6px}
 
+/* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(45,27,26,.55);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow-y:auto;animation:fadeIn .2s}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .modal{background:var(--warm-white);border-radius:16px;max-width:760px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.4);animation:slideUp .3s}
@@ -177,7 +177,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
     <div id="loginError" class="error"></div>
     <div class="hint-box">
       <strong>First time?</strong><br>
-      Firebase Console → Authentication → Users → <strong>"Add user"</strong> se admin account banayein, phir yahan login karein.
+      Firebase Console → Authentication → Users → <strong>"Add user"</strong> se admin account banayein.
     </div>
   </div>
 </div>
@@ -277,7 +277,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
         </div>
       </section>
 
-      <!-- INVENTORY (UPDATED) -->
+      <!-- INVENTORY -->
       <section id="view-inventory" class="view hidden">
         <div class="card">
           <div class="card-header" style="flex-direction: column; align-items: stretch; gap: 16px;">
@@ -288,7 +288,6 @@ table tr:hover{background:rgba(201,169,110,.04)}
               </div>
             </div>
             
-            <!-- Filters & Search -->
             <div style="display: flex; gap: 12px; flex-wrap: wrap; background: var(--cream); padding: 12px; border-radius: 8px; border: 1px solid #e5ddd3;">
               <input type="text" id="invSearch" placeholder="🔍 Search by product name..." style="flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid #e5ddd3; border-radius: 6px; font-family: inherit;" oninput="renderInventory()">
               
@@ -468,7 +467,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc,
-  doc, query, where, orderBy, limit, serverTimestamp, getDoc
+  doc, query, where, orderBy, limit, serverTimestamp, getDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
@@ -486,8 +485,7 @@ const firebaseConfig = {
   projectId: "silk-and-soul",
   storageBucket: "silk-and-soul.firebasestorage.app",
   messagingSenderId: "925303527952",
-  appId: "1:925303527952:web:111e2a00f85cb9859e4895",
-  measurementId: "G-VQEPZK9BYX"
+  appId: "1:925303527952:web:111e2a00f85cb9859e4895"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -551,7 +549,7 @@ onAuthStateChanged(auth, (user) => {
     $('#app').classList.remove('hidden');
     $('#userEmail').textContent = user.email || '';
     $('#settingsEmail').value = user.email || '';
-    refreshAll();
+    setupLiveListeners(); // <--- IMPORTANT: Realtime Listener Start
   } else {
     state.user = null;
     $('#app').classList.add('hidden');
@@ -600,7 +598,6 @@ function switchView(view) {
   if (view === 'products') renderProducts();
   if (view === 'orders') renderOrders();
   if (view === 'inventory') {
-    // Reset filters when opening inventory
     if ($('#invSearch')) $('#invSearch').value = '';
     if ($('#invStatusFilter')) $('#invStatusFilter').value = 'all';
     if ($('#invCategoryFilter')) $('#invCategoryFilter').value = 'all';
@@ -611,22 +608,35 @@ function switchView(view) {
 }
 
 /* =========================================================
-   DATA LOADERS
+   LIVE DATA LISTENERS (REAL-TIME)
    ========================================================= */
-async function refreshAll() {
-  try {
-    const [prodSnap, ordSnap] = await Promise.all([
-      getDocs(collection(db, 'products')),
-      getDocs(collection(db, 'orders'))
-    ]);
-    state.products = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    state.orders = ordSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-
+function setupLiveListeners() {
+  // 1. Listen to Products Collection
+  onSnapshot(collection(db, 'products'), (snap) => {
+    state.products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    // Sort by latest created
     state.products.sort((a, b) => {
       const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
       const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
       return tb - ta;
     });
+
+    computeStats();
+    
+    // Refresh current view
+    if (state.currentView === 'dashboard') renderDashboard();
+    if (state.currentView === 'products') renderProducts();
+    if (state.currentView === 'inventory') renderInventory();
+  }, (error) => {
+    console.error("Products Listener Error:", error);
+  });
+
+  // 2. Listen to Orders Collection
+  onSnapshot(collection(db, 'orders'), (snap) => {
+    state.orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    // Sort by latest
     state.orders.sort((a, b) => {
       const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
       const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
@@ -634,14 +644,13 @@ async function refreshAll() {
     });
 
     computeStats();
-    renderStats();
-    renderLowStock();
-    renderRecentOrders();
-    switchView(state.currentView);
-  } catch (e) {
-    console.error(e);
-    toast('Failed to load data: ' + e.message, 'error');
-  }
+
+    if (state.currentView === 'dashboard') renderDashboard();
+    if (state.currentView === 'orders') renderOrders();
+    if (state.currentView === 'customers') renderCustomers();
+  }, (error) => {
+    console.error("Orders Listener Error:", error);
+  });
 }
 
 function computeStats() {
@@ -649,8 +658,6 @@ function computeStats() {
   const orders = state.orders;
   const revenue = orders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + Number(o.total || 0), 0);
   const emails = new Set(orders.map(o => (o.customer && o.customer.email) || '').filter(Boolean));
-  
-  // Calculate total inventory items
   const totalStock = products.reduce((sum, p) => sum + (Number(p.stock) || 0), 0);
 
   state.stats = {
@@ -663,6 +670,7 @@ function computeStats() {
     customers: emails.size,
   };
   
+  // Customer derivation
   const map = new Map();
   for (const o of orders) {
     const c = o.customer || {};
@@ -894,7 +902,7 @@ async function saveProduct() {
     }
 
     closeProductModal();
-    await refreshAll();
+    // No need to refresh manually, onSnapshot handles it!
   } catch (e) {
     console.error(e);
     toast(e.message || 'Save failed', 'error');
@@ -909,7 +917,7 @@ async function deleteProduct(id) {
   try {
     await deleteDoc(doc(db, 'products', id));
     toast('Product deleted', 'success');
-    await refreshAll();
+    // onSnapshot handles UI update automatically
   } catch (e) { toast(e.message, 'error'); }
 }
 
@@ -958,9 +966,6 @@ async function updateOrderStatus(id, status) {
   try {
     await updateDoc(doc(db, 'orders', id), { status, updatedAt: serverTimestamp() });
     toast('Order status updated ✓', 'success');
-    const o = state.orders.find(x => x.id === id);
-    if (o) o.status = status;
-    computeStats(); renderStats();
   } catch (e) { toast(e.message, 'error'); }
 }
 
@@ -969,7 +974,6 @@ async function deleteOrder(id) {
   try {
     await deleteDoc(doc(db, 'orders', id));
     toast('Order deleted', 'success');
-    await refreshAll();
   } catch (e) { toast(e.message, 'error'); }
 }
 
@@ -989,12 +993,11 @@ async function createTestOrder() {
   try {
     await addDoc(collection(db, 'orders'), order);
     toast('Test order created ✓', 'success');
-    await refreshAll();
   } catch (e) { toast(e.message, 'error'); }
 }
 
 /* =========================================================
-   INVENTORY MANAGEMENT (NEW SYSTEM)
+   INVENTORY MANAGEMENT
    ========================================================= */
 function renderInventory() {
   const tbody = $('#inventoryBody');
@@ -1003,12 +1006,10 @@ function renderInventory() {
     return;
   }
 
-  // Get filter values
   const search = $('#invSearch').value.toLowerCase();
   const statusFilter = $('#invStatusFilter').value;
   const catFilter = $('#invCategoryFilter').value;
 
-  // Filter products
   let filtered = state.products.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search) || (p.variant && p.variant.toLowerCase().includes(search));
     const matchCat = catFilter === 'all' || p.category === catFilter;
@@ -1027,7 +1028,6 @@ function renderInventory() {
     return;
   }
 
-  // Render rows
   tbody.innerHTML = filtered.map(p => {
     const stock = Number(p.stock) || 0;
     const cls = stock === 0 ? 'out' : stock < 5 ? 'low' : 'in';
@@ -1056,7 +1056,6 @@ function renderInventory() {
   }).join('');
 }
 
-// Quick +/- Buttons
 async function adjustStock(id, delta) {
   const p = state.products.find(x => x.id === id);
   if (!p) return;
@@ -1064,17 +1063,12 @@ async function adjustStock(id, delta) {
   
   try {
     await updateDoc(doc(db, 'products', id), { stock: newStock, updatedAt: serverTimestamp() });
-    p.stock = newStock; // Update local state
-    renderInventory();
-    renderLowStock();
-    computeStats();
-    renderStats();
+    // onSnapshot will automatically trigger re-render!
   } catch (e) {
     toast(e.message, 'error');
   }
 }
 
-// Open Modal to Set Exact Stock
 function openStockModal(id) {
   const p = state.products.find(x => x.id === id);
   if (!p) return;
@@ -1084,9 +1078,7 @@ function openStockModal(id) {
   
   if (newStock !== null && newStock !== "") {
     const num = Math.max(0, parseInt(newStock) || 0);
-    if (num !== currentStock) {
-      setStock(id, num);
-    }
+    if (num !== currentStock) setStock(id, num);
   }
 }
 
@@ -1095,18 +1087,12 @@ async function setStock(id, num) {
   if (!p) return;
   try {
     await updateDoc(doc(db, 'products', id), { stock: num, updatedAt: serverTimestamp() });
-    p.stock = num; // Update local state
-    renderInventory();
-    renderLowStock();
-    computeStats();
-    renderStats();
     toast(`Stock for "${p.name}" updated to ${num}`, 'success');
   } catch (e) {
     toast(e.message, 'error');
   }
 }
 
-// Export Inventory to CSV
 function exportInventory() {
   const products = state.products;
   if (!products.length) return toast('No data to export', 'error');
@@ -1116,7 +1102,6 @@ function exportInventory() {
   products.forEach(p => {
     const stock = Number(p.stock) || 0;
     const status = stock === 0 ? 'Out of Stock' : stock < 5 ? 'Low Stock' : 'In Stock';
-    // Wrap name in quotes to handle commas
     csv += `"${p.name}","${p.category}",${p.price},${stock},"${status}","${p.slug}"\n`;
   });
 
@@ -1196,7 +1181,7 @@ function bindEvents() {
 }
 
 bindEvents();
-console.log('✦ Silk & Soul Admin ready');
+console.log('✦ Silk & Soul Admin ready (Real-time enabled)');
 </script>
 </body>
 </html>
