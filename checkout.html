@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout – Silk & Soul</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ===== RESET & BASE ===== */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #7B2D4E;
+            --primary-light: #9E4168;
+            --primary-dark: #5A1E38;
+            --gold: #C9A96E;
+            --gold-light: #DFC896;
+            --gold-pale: #F4EDE0;
+            --cream: #FCF8F3;
+            --beige: #F0E8DE;
+            --warm-white: #FFFCF9;
+            --text-dark: #2D1B1A;
+            --text-soft: #4A3A38;
+            --text-muted: #7A6A68;
+            --shadow: 0 8px 40px rgba(45, 27, 26, 0.08);
+            --shadow-hover: 0 16px 56px rgba(45, 27, 26, 0.14);
+            --radius: 16px;
+            --radius-sm: 8px;
+            --transition: 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --max-width: 1280px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--warm-white);
+            color: var(--text-dark);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: var(--primary);
+            color: #fff;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 20px rgba(123, 45, 78, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(123, 45, 78, 0.4);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: transparent;
+            color: var(--primary);
+            padding: 14px 36px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            border: 2px solid var(--primary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* ================================================================
+           HEADER
+           ================================================================ */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 252, 249, 0.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(45, 27, 26, 0.05);
+            padding: 0;
+            transition: box-shadow 0.4s ease, background 0.4s ease;
+        }
+
+        .header.scrolled {
+            box-shadow: 0 4px 30px rgba(45, 27, 26, 0.06);
+            background: rgba(255, 252, 249, 0.97);
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            height: 70px;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            opacity: 0.85;
+        }
+
+        .logo .logo-icon {
+            font-size: 1.3rem;
+            color: var(--gold);
+            display: inline-block;
+            margin-right: 2px;
+        }
+
+        .logo .logo-silk {
+            color: var(--primary);
+        }
+        .logo .logo-amp {
+            color: var(--gold);
+            font-weight: 400;
+            font-style: italic;
+            margin: 0 1px;
+        }
+        .logo .logo-soul {
+            color: var(--primary);
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 36px;
+        }
+
+        .nav a {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-soft);
+            transition: var(--transition);
+            position: relative;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            padding: 4px 0;
+        }
+
+        .nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gold);
+            transition: var(--transition);
+            border-radius: 2px;
+        }
+
+        .nav a:hover {
+            color: var(--primary);
+        }
+        .nav a:hover::after {
+            width: 100%;
+        }
+
+        .nav a.active {
+            color: var(--primary);
+        }
+        .nav a.active::after {
+            width: 100%;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-actions .icon-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: transparent;
+            border: 1px solid rgba(45, 27, 26, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-soft);
+            position: relative;
+            line-height: 1;
+        }
+
+        .nav-actions .icon-btn:hover {
+            background: var(--gold-pale);
+            border-color: var(--gold-light);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .nav-actions .icon-btn .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: 600;
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 8px rgba(123, 45, 78, 0.25);
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            line-height: 1;
+        }
+
+        .mobile-toggle:hover {
+            background: var(--gold-pale);
+        }
+
+        @media (max-width: 1024px) {
+            .nav {
+                display: none;
+                flex-direction: column;
+                align-items: flex-start;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: var(--warm-white);
+                padding: 28px 24px 32px;
+                box-shadow: 0 20px 40px rgba(45, 27, 26, 0.08);
+                border-bottom: 1px solid rgba(45, 27, 26, 0.04);
+                gap: 20px;
+            }
+            .nav.open {
+                display: flex;
+            }
+            .nav a {
+                font-size: 1rem;
+                letter-spacing: 0.8px;
+                padding: 6px 0;
+                width: 100%;
+                border-bottom: 1px solid rgba(45, 27, 26, 0.04);
+            }
+            .nav a:last-child {
+                border-bottom: none;
+            }
+            .nav a::after {
+                display: none;
+            }
+            .nav a:hover {
+                color: var(--primary);
+                padding-left: 4px;
+            }
+            .mobile-toggle {
+                display: block;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-inner {
+                height: 60px;
+            }
+            .logo {
+                font-size: 1.3rem;
+            }
+            .logo .logo-icon {
+                font-size: 1rem;
+            }
+            .nav-actions {
+                gap: 4px;
+            }
+            .nav-actions .icon-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+            .nav-actions .icon-btn .badge {
+                width: 17px;
+                height: 17px;
+                font-size: 0.5rem;
+                top: -3px;
+                right: -3px;
+            }
+            .nav {
+                top: 60px;
+                padding: 20px 20px 24px;
+                gap: 16px;
+            }
+            .nav a {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* ================================================================
+           CHECKOUT PAGE
+           ================================================================ */
+        .checkout-hero {
+            padding: 36px 0 32px;
+            background: linear-gradient(165deg, var(--cream) 0%, var(--warm-white) 100%);
+            border-bottom: 1px solid rgba(45, 27, 26, 0.04);
+        }
+
+        .checkout-hero .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .checkout-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            letter-spacing: -0.02em;
+        }
+
+        .checkout-hero h1 .highlight {
+            color: var(--primary);
+            font-style: italic;
+        }
+
+        .checkout-hero .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .checkout-hero .breadcrumb a {
+            color: var(--primary);
+            transition: var(--transition);
+        }
+
+        .checkout-hero .breadcrumb a:hover {
+            color: var(--primary-dark);
+        }
+
+        .checkout-hero .breadcrumb .sep {
+            color: var(--gold-light);
+        }
+
+        .checkout-hero .breadcrumb .current {
+            color: var(--text-soft);
+            font-weight: 500;
+        }
+
+        /* ===== CHECKOUT LAYOUT ===== */
+        .checkout-main {
+            padding: 48px 0 80px;
+            background: var(--warm-white);
+        }
+
+        .checkout-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 48px;
+            align-items: start;
+        }
+
+        /* --- Checkout Form --- */
+        .checkout-form {
+            background: var(--cream);
+            border-radius: var(--radius);
+            padding: 36px 40px 40px;
+            border: 1px solid rgba(45, 27, 26, 0.04);
+        }
+
+        .checkout-form h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+            letter-spacing: -0.01em;
+        }
+
+        .checkout-form .form-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-soft);
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .form-group label .required {
+            color: #D32F2F;
+            margin-left: 2px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(45, 27, 26, 0.08);
+            border-radius: var(--radius-sm);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            background: var(--warm-white);
+            color: var(--text-dark);
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.12);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group .helper-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* --- Payment Methods --- */
+        .payment-section {
+            margin-top: 32px;
+            padding-top: 28px;
+            border-top: 1px solid rgba(45, 27, 26, 0.06);
+        }
+
+        .payment-section h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+            letter-spacing: -0.01em;
+        }
+
+        .payment-option {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border: 2px solid rgba(45, 27, 26, 0.06);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 10px;
+            background: var(--warm-white);
+        }
+
+        .payment-option:hover {
+            border-color: var(--gold-light);
+            background: var(--gold-pale);
+        }
+
+        .payment-option.selected {
+            border-color: var(--primary);
+            background: rgba(123, 45, 78, 0.04);
+        }
+
+        .payment-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .payment-option .payment-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .payment-option .payment-label .icon {
+            font-size: 1.3rem;
+        }
+
+        .payment-option .payment-label .desc {
+            font-weight: 400;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        /* --- Place Order Button --- */
+        .place-order-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            letter-spacing: 0.5px;
+            margin-top: 32px;
+            box-shadow: 0 4px 20px rgba(123, 45, 78, 0.25);
+        }
+
+        .place-order-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(123, 45, 78, 0.35);
+        }
+
+        .place-order-btn:active {
+            transform: translateY(0);
+        }
+
+        .place-order-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* --- Order Summary (Right Column) --- */
+        .order-summary {
+            background: var(--cream);
+            border-radius: var(--radius);
+            padding: 32px 28px;
+            border: 1px solid rgba(45, 27, 26, 0.04);
+            position: sticky;
+            top: 100px;
+        }
+
+        .order-summary h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .order-summary h3 .count-badge {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--gold-pale);
+            color: var(--text-soft);
+            padding: 2px 12px;
+            border-radius: 50px;
+        }
+
+        .order-items {
+            max-height: 320px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 4px;
+        }
+
+        .order-items::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .order-items::-webkit-scrollbar-track {
+            background: rgba(45, 27, 26, 0.04);
+            border-radius: 4px;
+        }
+
+        .order-items::-webkit-scrollbar-thumb {
+            background: var(--gold-light);
+            border-radius: 4px;
+        }
+
+        .order-item {
+            display: flex;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(45, 27, 26, 0.04);
+            align-items: center;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item .item-thumb {
+            width: 56px;
+            height: 72px;
+            flex-shrink: 0;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: var(--beige);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .order-item .item-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .order-item .item-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .order-item .item-details .name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .order-item .item-details .variant {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .order-item .item-details .qty-price {
+            font-size: 0.8rem;
+            color: var(--text-soft);
+            margin-top: 2px;
+        }
+
+        .order-item .item-details .qty-price .price {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .order-summary .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 0.92rem;
+            color: var(--text-soft);
+            border-bottom: 1px solid rgba(45, 27, 26, 0.04);
+        }
+
+        .order-summary .summary-row:last-of-type {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .order-summary .summary-row .label {
+            font-weight: 400;
+        }
+
+        .order-summary .summary-row .value {
+            font-weight: 500;
+        }
+
+        .order-summary .summary-row.total {
+            padding-top: 14px;
+            margin-top: 8px;
+            border-top: 2px solid rgba(45, 27, 26, 0.08);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .order-summary .summary-row.total .value {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .order-summary .secure-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 18px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            padding-top: 16px;
+            border-top: 1px solid rgba(45, 27, 26, 0.04);
+        }
+
+        .order-summary .secure-note .icon {
+            font-size: 1.1rem;
+        }
+
+        /* ================================================================
+           PAYMENT MODAL
+           ================================================================ */
+        .payment-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .payment-modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .payment-modal {
+            background: var(--warm-white);
+            border-radius: var(--radius);
+            max-width: 480px;
+            width: 100%;
+            padding: 40px 36px 36px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .payment-modal .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            line-height: 1;
+        }
+
+        .payment-modal .modal-close:hover {
+            color: var(--text-dark);
+            transform: rotate(90deg);
+        }
+
+        .payment-modal .modal-icon {
+            font-size: 2.8rem;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .payment-modal h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .payment-modal .modal-sub {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            margin-bottom: 24px;
+        }
+
+        .payment-modal .modal-sub .amount {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        /* UPI QR Code */
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0 20px;
+        }
+
+        .qr-container .qr-box {
+            width: 180px;
+            height: 180px;
+            background: #fff;
+            border: 2px solid var(--gold-light);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .qr-container .qr-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .qr-container .upi-id {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            background: var(--gold-pale);
+            padding: 4px 16px;
+            border-radius: 50px;
+            letter-spacing: 0.5px;
+        }
+
+        .qr-container .upi-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        /* Card Form */
+        .card-form {
+            margin: 8px 0 16px;
+        }
+
+        .card-form .card-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .card-form .card-group {
+            margin-bottom: 14px;
+        }
+
+        .card-form .card-group label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-soft);
+            margin-bottom: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        .card-form .card-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid rgba(45, 27, 26, 0.08);
+            border-radius: var(--radius-sm);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.92rem;
+            background: var(--warm-white);
+            color: var(--text-dark);
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .card-form .card-group input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.12);
+        }
+
+        .card-form .card-group input::placeholder {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .card-icons {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .card-icons span {
+            font-size: 1.4rem;
+            opacity: 0.6;
+            transition: var(--transition);
+        }
+
+        .card-icons span:hover {
+            opacity: 1;
+        }
+
+        .pay-now-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: var(--transition);
+            letter-spacing: 0.5px;
+            margin-top: 8px;
+            box-shadow: 0 4px 20px rgba(123, 45, 78, 0.25);
+        }
+
+        .pay-now-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(123, 45, 78, 0.35);
+        }
+
+        .pay-now-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .pay-now-btn .btn-loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ================================================================
+           FOOTER
+           ================================================================ */
+        .footer {
+            padding: 56px 0 32px;
+            background: var(--text-dark);
+            color: rgba(255, 255, 255, 0.7);
+            border-top: 3px solid var(--gold);
+        }
+
+        .footer .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 48px;
+        }
+
+        .footer-brand .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 14px;
+            letter-spacing: -0.5px;
+            transition: var(--transition);
+        }
+
+        .footer-brand .logo:hover {
+            opacity: 0.85;
+        }
+
+        .footer-brand .logo .logo-icon {
+            color: var(--gold);
+            font-size: 1.3rem;
+        }
+        .footer-brand .logo .logo-amp {
+            color: var(--gold);
+            font-weight: 400;
+            font-style: italic;
+            margin: 0 1px;
+        }
+
+        .footer-brand p {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            max-width: 280px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 0;
+            font-weight: 300;
+        }
+
+        .footer-col h4 {
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        .footer-col h4::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 28px;
+            height: 2px;
+            background: var(--gold);
+            border-radius: 2px;
+        }
+
+        .footer-col a {
+            display: block;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 10px;
+            transition: var(--transition);
+            font-weight: 300;
+            letter-spacing: 0.2px;
+        }
+
+        .footer-col a:hover {
+            color: var(--gold);
+            transform: translateX(3px);
+        }
+
+        .footer-divider {
+            grid-column: 1 / -1;
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.2), transparent);
+            margin: 28px 0 24px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.35);
+            grid-column: 1 / -1;
+            padding-top: 4px;
+            letter-spacing: 0.3px;
+            font-weight: 300;
+        }
+
+        .footer-bottom .heart {
+            color: var(--gold);
+            display: inline-block;
+            transition: var(--transition);
+        }
+
+        .footer-bottom .heart:hover {
+            transform: scale(1.2);
+        }
+
+        /* ================================================================
+           RESPONSIVE
+           ================================================================ */
+
+        @media (max-width: 1024px) {
+            .checkout-layout {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .order-summary {
+                position: relative;
+                top: 0;
+            }
+            .footer .container {
+                gap: 36px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+            .checkout-hero h1 {
+                font-size: 1.8rem;
+            }
+            .checkout-form {
+                padding: 24px 20px 28px;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .order-summary {
+                padding: 24px 20px;
+            }
+            .footer .container {
+                grid-template-columns: 1fr 1fr;
+                gap: 32px;
+            }
+            .footer-brand {
+                grid-column: 1 / -1;
+            }
+            .footer-brand p {
+                max-width: 100%;
+            }
+            .payment-modal {
+                padding: 28px 20px 24px;
+                margin: 12px;
+            }
+            .payment-modal .modal-icon {
+                font-size: 2.2rem;
+            }
+            .payment-modal h3 {
+                font-size: 1.3rem;
+            }
+            .qr-container .qr-box {
+                width: 150px;
+                height: 150px;
+            }
+            .card-form .card-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 16px;
+            }
+            .checkout-hero {
+                padding: 24px 0 20px;
+            }
+            .checkout-hero h1 {
+                font-size: 1.4rem;
+            }
+            .checkout-hero .breadcrumb {
+                font-size: 0.75rem;
+            }
+            .checkout-main {
+                padding: 28px 0 56px;
+            }
+            .checkout-form {
+                padding: 18px 14px 24px;
+            }
+            .checkout-form h2 {
+                font-size: 1.2rem;
+            }
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 0.88rem;
+                padding: 10px 14px;
+            }
+            .payment-option {
+                padding: 12px 14px;
+            }
+            .payment-option .payment-label {
+                font-size: 0.88rem;
+            }
+            .place-order-btn {
+                font-size: 1rem;
+                padding: 14px;
+            }
+            .order-summary h3 {
+                font-size: 1.1rem;
+            }
+            .order-item .item-thumb {
+                width: 44px;
+                height: 56px;
+            }
+            .order-item .item-details .name {
+                font-size: 0.82rem;
+            }
+            .order-item .item-details .variant {
+                font-size: 0.7rem;
+            }
+            .order-summary .summary-row {
+                font-size: 0.85rem;
+                padding: 8px 0;
+            }
+            .order-summary .summary-row.total {
+                font-size: 1rem;
+                padding-top: 12px;
+            }
+            .order-summary .summary-row.total .value {
+                font-size: 1.1rem;
+            }
+            .footer {
+                padding: 36px 0 20px;
+            }
+            .footer .container {
+                grid-template-columns: 1fr;
+                gap: 28px;
+            }
+            .footer-brand .logo {
+                font-size: 1.3rem;
+            }
+            .footer-brand p {
+                font-size: 0.85rem;
+            }
+            .footer-col h4 {
+                font-size: 0.8rem;
+                margin-bottom: 12px;
+            }
+            .footer-col a {
+                font-size: 0.8rem;
+                margin-bottom: 6px;
+            }
+            .footer-divider {
+                margin: 16px 0 14px;
+            }
+            .footer-bottom {
+                font-size: 0.7rem;
+            }
+            .payment-modal {
+                padding: 20px 14px 20px;
+            }
+            .payment-modal .modal-icon {
+                font-size: 2rem;
+            }
+            .payment-modal h3 {
+                font-size: 1.1rem;
+            }
+            .payment-modal .modal-sub {
+                font-size: 0.82rem;
+            }
+            .qr-container .qr-box {
+                width: 130px;
+                height: 130px;
+                padding: 8px;
+            }
+            .qr-container .upi-id {
+                font-size: 0.8rem;
+                padding: 2px 12px;
+            }
+            .pay-now-btn {
+                font-size: 0.95rem;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================================================================
+    HEADER
+    ================================================================ -->
+    <header class="header" id="header">
+        <div class="container header-inner">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">✦</span>
+                <span class="logo-silk">Silk</span>
+                <span class="logo-amp">&amp;</span>
+                <span class="logo-soul">Soul</span>
+            </a>
+
+            <nav class="nav" id="mainNav">
+                <a href="index.html">Home</a>
+                <a href="shop.html">Shop</a>
+                <a href="index.html#best-sellers">Best Sellers</a>
+                <a href="index.html#testimonials">Reviews</a>
+            </nav>
+
+            <div class="nav-actions">
+                <button class="icon-btn" aria-label="Search">🔍</button>
+                <button class="icon-btn" aria-label="Wishlist">♡</button>
+                <button class="icon-btn" aria-label="Cart" id="cartIconBtn">
+                    🛒
+                    <span class="badge" id="cartBadge">0</span>
+                </button>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">☰</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================================================================
+    CHECKOUT HERO
+    ================================================================ -->
+    <section class="checkout-hero">
+        <div class="container">
+            <h1>
+                <span class="highlight">Checkout</span>
+            </h1>
+            <div class="breadcrumb">
+                <a href="index.html">Home</a>
+                <span class="sep">/</span>
+                <a href="cart.html">Cart</a>
+                <span class="sep">/</span>
+                <span class="current">Checkout</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================
+    CHECKOUT MAIN
+    ================================================================ -->
+    <section class="checkout-main">
+        <div class="container">
+            <div class="checkout-layout">
+
+                <!-- ===== CHECKOUT FORM ===== -->
+                <div class="checkout-form" id="checkoutForm">
+                    <h2>Shipping Details</h2>
+                    <p class="form-subtitle">Fill in your details to complete your order.</p>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name <span class="required">*</span></label>
+                            <input type="text" id="firstName" placeholder="e.g. Priya" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name <span class="required">*</span></label>
+                            <input type="text" id="lastName" placeholder="e.g. Sharma" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address <span class="required">*</span></label>
+                        <input type="email" id="email" placeholder="you@example.com" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number <span class="required">*</span></label>
+                        <input type="tel" id="phone" placeholder="+91 98765 43210" required />
+                        <div class="helper-text">We'll send order updates to this number.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Address <span class="required">*</span></label>
+                        <textarea id="address" placeholder="Street address, building, apartment..." required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city">City <span class="required">*</span></label>
+                            <input type="text" id="city" placeholder="e.g. Mumbai" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State <span class="required">*</span></label>
+                            <input type="text" id="state" placeholder="e.g. Maharashtra" required />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pincode">Pincode <span class="required">*</span></label>
+                            <input type="text" id="pincode" placeholder="400001" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country</label>
+                            <input type="text" id="country" value="India" disabled style="opacity:0.7;cursor:not-allowed;" />
+                        </div>
+                    </div>
+
+                    <!-- ===== PAYMENT SECTION ===== -->
+                    <div class="payment-section">
+                        <h3>Payment Method</h3>
+
+                        <label class="payment-option selected">
+                            <input type="radio" name="payment" value="Cash on Delivery" checked />
+                            <span class="payment-label">
+                                <span class="icon">💵</span>
+                                Cash on Delivery
+                                <span class="desc">(Pay when you receive)</span>
+                            </span>
+                        </label>
+
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="UPI" />
+                            <span class="payment-label">
+                                <span class="icon">📱</span>
+                                UPI
+                                <span class="desc">(GPay, PhonePe, Paytm)</span>
+                            </span>
+                        </label>
+
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="Credit/Debit Card" />
+                            <span class="payment-label">
+                                <span class="icon">💳</span>
+                                Credit / Debit Card
+                                <span class="desc">(Visa, Mastercard, RuPay)</span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <button class="place-order-btn" id="placeOrderBtn">✦ Place Order</button>
+                </div>
+
+                <!-- ===== ORDER SUMMARY ===== -->
+                <div class="order-summary" id="orderSummary">
+                    <h3>
+                        Your Order
+                        <span class="count-badge" id="orderCountBadge">0 items</span>
+                    </h3>
+
+                    <div class="order-items" id="orderItemsList">
+                        <!-- Rendered by JS -->
+                    </div>
+
+                    <div class="summary-row">
+                        <span class="label">Subtotal</span>
+                        <span class="value" id="checkoutSubtotal">₹0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Shipping</span>
+                        <span class="value" id="checkoutShipping">₹0</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span class="label">Total</span>
+                        <span class="value" id="checkoutTotal">₹0</span>
+                    </div>
+
+                    <div class="secure-note">
+                        <span class="icon">🔒</span>
+                        Your information is secure and private.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================
+    PAYMENT MODAL
+    ================================================================ -->
+    <div class="payment-modal-overlay" id="paymentModal">
+        <div class="payment-modal">
+            <button class="modal-close" id="modalCloseBtn" aria-label="Close">✕</button>
+
+            <!-- UPI Content -->
+            <div id="upiContent">
+                <div class="modal-icon">📱</div>
+                <h3>Pay with UPI</h3>
+                <p class="modal-sub">
+                    Scan the QR code below using <strong>GPay, PhonePe, or Paytm</strong><br />
+                    Amount: <span class="amount" id="upiAmount">₹0</span>
+                </p>
+                <div class="qr-container">
+                    <div class="qr-box">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=SilkSoul@upi&pn=Silk%20%26%20Soul&am=0&cu=INR" alt="UPI QR Code" id="upiQrImage" />
+                    </div>
+                    <span class="upi-id">SilkSoul@upi</span>
+                    <p class="upi-hint">Scan this QR code with any UPI app to pay</p>
+                </div>
+                <button class="pay-now-btn" id="upiPayBtn">✅ I have paid — Confirm Order</button>
+            </div>
+
+            <!-- Card Content -->
+            <div id="cardContent" style="display:none;">
+                <div class="modal-icon">💳</div>
+                <h3>Pay with Card</h3>
+                <p class="modal-sub">
+                    Enter your card details to complete payment<br />
+                    Amount: <span class="amount" id="cardAmount">₹0</span>
+                </p>
+                <div class="card-form">
+                    <div class="card-group">
+                        <label for="cardNumber">Card Number</label>
+                        <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" />
+                    </div>
+                    <div class="card-row">
+                        <div class="card-group">
+                            <label for="cardExpiry">Expiry Date</label>
+                            <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" />
+                        </div>
+                        <div class="card-group">
+                            <label for="cardCvv">CVV</label>
+                            <input type="text" id="cardCvv" placeholder="123" maxlength="4" />
+                        </div>
+                    </div>
+                    <div class="card-group">
+                        <label for="cardName">Cardholder Name</label>
+                        <input type="text" id="cardName" placeholder="Full name on card" />
+                    </div>
+                    <div class="card-icons">
+                        <span>💳</span>
+                        <span>🏦</span>
+                        <span>🔷</span>
+                        <span style="font-size:0.7rem;color:var(--text-muted);margin-left:auto;">Visa · Mastercard · RuPay</span>
+                    </div>
+                </div>
+                <button class="pay-now-btn" id="cardPayBtn">💳 Pay Now — Confirm Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================
+    FOOTER
+    ================================================================ -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-brand">
+                <div class="logo">
+                    <span class="logo-icon">✦</span>
+                    <span class="logo-silk">Silk</span>
+                    <span class="logo-amp">&amp;</span>
+                    <span class="logo-soul">Soul</span>
+                </div>
+                <p>
+                    Sarees designed for real life — where elegance meets
+                    everyday comfort. Made with love for women who move.
+                </p>
+            </div>
+
+            <div class="footer-col">
+                <h4>Shop</h4>
+                <a href="#">Cotton Sarees</a>
+                <a href="#">Silk Sarees</a>
+                <a href="#">Georgette</a>
+                <a href="#">Designer Drapes</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>Support</h4>
+                <a href="#">Shipping Info</a>
+                <a href="#">Returns &amp; Exchanges</a>
+                <a href="#">Size Guide</a>
+                <a href="#">Contact Us</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>Company</h4>
+                <a href="#">About Us</a>
+                <a href="#">Our Story</a>
+                <a href="#">Sustainability</a>
+                <a href="#">Careers</a>
+            </div>
+
+            <hr class="footer-divider" />
+
+            <div class="footer-bottom">
+                © 2026 Silk &amp; Soul. Made with <span class="heart">♥</span> for women who move the world.
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================================================================
+    SCRIPT — FIXED: Cart items now show properly
+    ================================================================ -->
+    <script>
+        // ================================================================
+        // CART STATE — Read from localStorage
+        // ================================================================
+        let cart = [];
+
+        function loadCart() {
+            const stored = localStorage.getItem('silkSoulCart');
+            if (stored) {
+                try {
+                    cart = JSON.parse(stored);
+                } catch (e) {
+                    cart = [];
+                }
+            } else {
+                // Seed with sample data only if absolutely empty
+                cart = [];
+                localStorage.setItem('silkSoulCart', JSON.stringify(cart));
+            }
+            // Ensure each item has a quantity
+            cart = cart.map(item => ({
+                ...item,
+                quantity: item.quantity || 1
+            }));
+            // Remove items that are malformed
+            cart = cart.filter(item => item.id && item.name);
+            saveCart();
+        }
+
+        function saveCart() {
+            localStorage.setItem('silkSoulCart', JSON.stringify(cart));
+            updateUI();
+        }
+
+        // ================================================================
+        // UI UPDATE — Uses cart data directly (no PRODUCTS lookup needed)
+        // ================================================================
+        function getCartItems() {
+            // Cart items already have all needed fields: id, name, variant, price, image, quantity
+            return cart.map(item => ({
+                ...item,
+                total: (item.price || 0) * (item.quantity || 1)
+            }));
+        }
+
+        function getCartTotal() {
+            return getCartItems().reduce((sum, item) => sum + item.total, 0);
+        }
+
+        function getCartCount() {
+            return getCartItems().reduce((sum, item) => sum + (item.quantity || 1), 0);
+        }
+
+        function updateUI() {
+            const items = getCartItems();
+            const count = getCartCount();
+            const total = getCartTotal();
+            const shipping = total > 0 && total < 1000 ? 99 : 0;
+            const grandTotal = total + shipping;
+
+            // Update badge
+            document.getElementById('cartBadge').textContent = count;
+            document.getElementById('orderCountBadge').textContent = count + ' item' + (count !== 1 ? 's' : '');
+
+            // Render items list
+            const list = document.getElementById('orderItemsList');
+            if (items.length === 0) {
+                list.innerHTML =
+                    `<div style="text-align:center;padding:24px 0;color:var(--text-muted);font-size:0.9rem;">Your cart is empty.<br><a href="index.html#categories" style="color:var(--primary);font-weight:600;">Continue shopping →</a></div>`;
+            } else {
+                list.innerHTML = items.map(item => `
+                    <div class="order-item">
+                        <div class="item-thumb">
+                            <img src="${item.image || 'https://via.placeholder.com/100x100/EEE/7B2D4E?text=Saree'}" alt="${item.name}" loading="lazy" />
+                        </div>
+                        <div class="item-details">
+                            <div class="name">${item.name}</div>
+                            <div class="variant">${item.variant || ''}</div>
+                            <div class="qty-price">
+                                Qty: ${item.quantity || 1} × <span class="price">₹${(item.price || 0).toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Update totals
+            document.getElementById('checkoutSubtotal').textContent = `₹${total.toLocaleString()}`;
+            document.getElementById('checkoutShipping').textContent = shipping === 0 ? 'FREE' : `₹${shipping}`;
+            document.getElementById('checkoutTotal').textContent = `₹${grandTotal.toLocaleString()}`;
+        }
+
+        // ================================================================
+        // PAYMENT METHOD SELECTION
+        // ================================================================
+        document.querySelectorAll('.payment-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                this.querySelector('input[type="radio"]').checked = true;
+            });
+        });
+
+        // ================================================================
+        // GET ORDER DATA (shared across flows)
+        // ================================================================
+        function getOrderData() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const state = document.getElementById('state').value.trim();
+            const pincode = document.getElementById('pincode').value.trim();
+
+            const selectedPayment = document.querySelector('input[name="payment"]:checked');
+            const paymentMethod = selectedPayment ? selectedPayment.value : 'Cash on Delivery';
+
+            const items = getCartItems();
+            const total = getCartTotal();
+            const shipping = total > 0 && total < 1000 ? 99 : 0;
+            const grandTotal = total + shipping;
+
+            const fullName = `${firstName} ${lastName}`;
+            const itemList = items.map(item =>
+                `${item.name} (${item.variant || ''}) × ${item.quantity || 1} = ₹${((item.price || 0) * (item.quantity || 1)).toLocaleString()}`
+            ).join('\n');
+
+            return {
+                firstName,
+                lastName,
+                fullName,
+                email,
+                phone,
+                address,
+                city,
+                state,
+                pincode,
+                paymentMethod,
+                items,
+                total,
+                shipping,
+                grandTotal,
+                itemList,
+                isValid: firstName && lastName && email && phone && address && city && state && pincode &&
+                    email.includes('@') && email.includes('.') && phone.replace(/\s/g, '').length >= 10
+            };
+        }
+
+        // ================================================================
+        // REDIRECT TO WHATSAPP with order details
+        // ================================================================
+        function redirectToWhatsApp(orderData) {
+            const message =
+                `🛍️ *New Order from Silk & Soul* 🛍️\n\n` +
+                `👤 *Customer:* ${orderData.fullName}\n` +
+                `📧 *Email:* ${orderData.email}\n` +
+                `📞 *Phone:* ${orderData.phone}\n\n` +
+                `📦 *Order Details:*\n${orderData.itemList}\n\n` +
+                `💰 *Subtotal:* ₹${orderData.total.toLocaleString()}\n` +
+                `🚚 *Shipping:* ${orderData.shipping === 0 ? 'FREE' : '₹' + orderData.shipping.toLocaleString()}\n` +
+                `💳 *Payment Method:* ${orderData.paymentMethod}\n` +
+                `🔢 *Total:* ₹${orderData.grandTotal.toLocaleString()}\n\n` +
+                `📍 *Shipping Address:*\n${orderData.address},\n${orderData.city}, ${orderData.state} - ${orderData.pincode}\n\n` +
+                `🙏 Thank you for your order!`;
+
+            const encoded = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/918979401469?text=${encoded}`;
+            window.location.href = whatsappUrl;
+        }
+
+        // ================================================================
+        // PLACE ORDER — Main handler
+        // ================================================================
+        document.getElementById('placeOrderBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const orderData = getOrderData();
+
+            if (!orderData.isValid) {
+                alert('Please fill in all required fields correctly.');
+                return;
+            }
+
+            const items = getCartItems();
+            if (items.length === 0) {
+                alert('Your cart is empty. Add some sarees first!');
+                return;
+            }
+
+            // Check payment method
+            if (orderData.paymentMethod === 'Cash on Delivery') {
+                // COD: directly go to WhatsApp
+                redirectToWhatsApp(orderData);
+                return;
+            }
+
+            // For UPI or Card: show payment modal
+            const modal = document.getElementById('paymentModal');
+            const upiContent = document.getElementById('upiContent');
+            const cardContent = document.getElementById('cardContent');
+
+            // Update amount in modal
+            document.getElementById('upiAmount').textContent = `₹${orderData.grandTotal.toLocaleString()}`;
+            document.getElementById('cardAmount').textContent = `₹${orderData.grandTotal.toLocaleString()}`;
+
+            // Update QR code with amount
+            const qrImg = document.getElementById('upiQrImage');
+            const upiUrl = `upi://pay?pa=SilkSoul@upi&pn=Silk%20%26%20Soul&am=${orderData.grandTotal}&cu=INR`;
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUrl)}`;
+
+            if (orderData.paymentMethod === 'UPI') {
+                upiContent.style.display = 'block';
+                cardContent.style.display = 'none';
+            } else if (orderData.paymentMethod === 'Credit/Debit Card') {
+                upiContent.style.display = 'none';
+                cardContent.style.display = 'block';
+                // Reset card form
+                document.getElementById('cardNumber').value = '';
+                document.getElementById('cardExpiry').value = '';
+                document.getElementById('cardCvv').value = '';
+                document.getElementById('cardName').value = '';
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        // ================================================================
+        // MODAL CLOSE
+        // ================================================================
+        function closeModal() {
+            document.getElementById('paymentModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+        document.getElementById('paymentModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ================================================================
+        // UPI PAY — Confirm payment
+        // ================================================================
+        document.getElementById('upiPayBtn').addEventListener('click', function() {
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="btn-loader"></span> Verifying payment...';
+
+            setTimeout(() => {
+                btn.innerHTML = '✅ Payment Confirmed — Redirecting...';
+                const orderData = getOrderData();
+                if (orderData.isValid) {
+                    // Clear cart
+                    localStorage.removeItem('silkSoulCart');
+                    cart = [];
+                    updateUI();
+                    redirectToWhatsApp(orderData);
+                } else {
+                    alert('Something went wrong. Please try again.');
+                    btn.disabled = false;
+                    btn.textContent = '✅ I have paid — Confirm Order';
+                }
+            }, 1500);
+        });
+
+        // ================================================================
+        // CARD PAY — Process card payment
+        // ================================================================
+        document.getElementById('cardPayBtn').addEventListener('click', function() {
+            const cardNumber = document.getElementById('cardNumber').value.trim();
+            const expiry = document.getElementById('cardExpiry').value.trim();
+            const cvv = document.getElementById('cardCvv').value.trim();
+            const cardName = document.getElementById('cardName').value.trim();
+
+            // Simple validation
+            const numClean = cardNumber.replace(/\s/g, '');
+            if (numClean.length < 15 || numClean.length > 16) {
+                alert('Please enter a valid 15-16 digit card number.');
+                return;
+            }
+            if (!expiry.match(/^\d{2}\/\d{2}$/)) {
+                alert('Please enter expiry date in MM/YY format.');
+                return;
+            }
+            if (cvv.length < 3 || cvv.length > 4) {
+                alert('Please enter a valid CVV (3-4 digits).');
+                return;
+            }
+            if (!cardName || cardName.length < 2) {
+                alert('Please enter the cardholder name.');
+                return;
+            }
+
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="btn-loader"></span> Processing payment...';
+
+            setTimeout(() => {
+                btn.innerHTML = '✅ Payment Successful — Redirecting...';
+                const orderData = getOrderData();
+                if (orderData.isValid) {
+                    localStorage.removeItem('silkSoulCart');
+                    cart = [];
+                    updateUI();
+                    redirectToWhatsApp(orderData);
+                } else {
+                    alert('Something went wrong. Please try again.');
+                    btn.disabled = false;
+                    btn.textContent = '💳 Pay Now — Confirm Order';
+                }
+            }, 1800);
+        });
+
+        // ================================================================
+        // CARD INPUT FORMATTING
+        // ================================================================
+        document.getElementById('cardNumber').addEventListener('input', function(e) {
+            let val = this.value.replace(/\s/g, '').replace(/\D/g, '');
+            if (val.length > 16) val = val.slice(0, 16);
+            let formatted = '';
+            for (let i = 0; i < val.length; i++) {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+                formatted += val[i];
+            }
+            this.value = formatted;
+        });
+
+        document.getElementById('cardExpiry').addEventListener('input', function(e) {
+            let val = this.value.replace(/\D/g, '');
+            if (val.length > 4) val = val.slice(0, 4);
+            if (val.length >= 2) {
+                const month = parseInt(val.slice(0, 2));
+                if (month > 12) {
+                    val = '12' + val.slice(2);
+                }
+            }
+            let formatted = '';
+            for (let i = 0; i < val.length; i++) {
+                if (i === 2) formatted += '/';
+                formatted += val[i];
+            }
+            this.value = formatted;
+        });
+
+        document.getElementById('cardCvv').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '').slice(0, 4);
+        });
+
+        // ================================================================
+        // MOBILE TOGGLE
+        // ================================================================
+        const toggle = document.getElementById('mobileToggle');
+        const nav = document.getElementById('mainNav');
+        const header = document.getElementById('header');
+
+        toggle.addEventListener('click', () => {
+            nav.classList.toggle('open');
+            toggle.textContent = nav.classList.contains('open') ? '✕' : '☰';
+        });
+
+        document.querySelectorAll('.nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                nav.classList.remove('open');
+                toggle.textContent = '☰';
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 10) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // ================================================================
+        // CART ICON CLICK — go to cart
+        // ================================================================
+        document.getElementById('cartIconBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = 'cart.html';
+        });
+
+        // ================================================================
+        // STORAGE LISTENER (sync cart across tabs)
+        // ================================================================
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'silkSoulCart') {
+                loadCart();
+            }
+        });
+
+        // ================================================================
+        // INIT
+        // ================================================================
+        loadCart();
+
+        console.log('✅ Checkout fixed — Items now show automatically from localStorage.');
+        console.log('📦 Cart items:', getCartItems());
+        console.log('💰 Total:', getCartTotal());
+    </script>
+
+</body>
+</html>
