@@ -3002,14 +3002,14 @@
     </footer>
 
     <!-- ================================================================
-    SCRIPT (Firebase & Cart Logic)
+    SCRIPT (Firebase Live Stock & Cart Logic)
     ================================================================ -->
     <script type="module">
         // ================================================================
         // FIREBASE IMPORTS & CONFIG
         // ================================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAV_cCJFySKWCfY3zPsZMkb5Oau9BAQNlc",
@@ -3035,84 +3035,85 @@
         const productGrid = document.getElementById('productGrid');
 
         // ================================================================
-        // CART FUNCTIONS
+        // CART & WISHLIST FUNCTIONS
         // ================================================================
-        function getCart() {
-            try {
-                return JSON.parse(localStorage.getItem('silkSoulCart') || '[]');
-            } catch { return []; }
-        }
+        function getCart() { try { return JSON.parse(localStorage.getItem('silkSoulCart') || '[]'); } catch { return []; } }
+        function saveCart(cart) { localStorage.setItem('silkSoulCart', JSON.stringify(cart)); updateCartBadge(); }
+        function updateCartBadge() { if (cartBadge) cartBadge.textContent = getCart().reduce((sum, item) => sum + (item.quantity || 1), 0); }
 
-        function saveCart(cart) {
-            localStorage.setItem('silkSoulCart', JSON.stringify(cart));
-            updateCartBadge();
-        }
-
-        function updateCartBadge() {
-            const cart = getCart();
-            const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-            if (cartBadge) cartBadge.textContent = count;
-        }
-
-        // ================================================================
-        // WISHLIST FUNCTIONS
-        // ================================================================
-        function getWishlist() {
-            try {
-                return JSON.parse(localStorage.getItem('silkSoulWishlist') || '[]');
-            } catch { return []; }
-        }
-
-        function saveWishlist(wishlist) {
-            localStorage.setItem('silkSoulWishlist', JSON.stringify(wishlist));
-            updateWishlistBadge();
-            updateWishlistButtons();
-        }
-
-        function updateWishlistBadge() {
-            const wishlist = getWishlist();
-            if (wishlistBadge) wishlistBadge.textContent = wishlist.length;
-        }
-
-        function toggleWishlist(productId) {
-            let wishlist = getWishlist();
-            const index = wishlist.indexOf(productId);
-            if (index > -1) {
-                wishlist.splice(index, 1);
-            } else {
-                wishlist.push(productId);
-            }
-            saveWishlist(wishlist);
-        }
-
-        function isInWishlist(productId) {
-            return getWishlist().includes(productId);
-        }
-
+        function getWishlist() { try { return JSON.parse(localStorage.getItem('silkSoulWishlist') || '[]'); } catch { return []; } }
+        function saveWishlist(wishlist) { localStorage.setItem('silkSoulWishlist', JSON.stringify(wishlist)); updateWishlistBadge(); updateWishlistButtons(); }
+        function updateWishlistBadge() { if (wishlistBadge) wishlistBadge.textContent = getWishlist().length; }
+        function toggleWishlist(productId) { let wishlist = getWishlist(); const index = wishlist.indexOf(productId); if (index > -1) wishlist.splice(index, 1); else wishlist.push(productId); saveWishlist(wishlist); }
+        function isInWishlist(productId) { return getWishlist().includes(productId); }
         function updateWishlistButtons() {
             document.querySelectorAll('.wishlist-btn').forEach(btn => {
-                const id = btn.dataset.productId;
-                if (isInWishlist(id)) {
-                    btn.textContent = '♥';
-                    btn.classList.add('active');
-                } else {
-                    btn.textContent = '♡';
-                    btn.classList.remove('active');
-                }
+                if (isInWishlist(btn.dataset.productId)) { btn.textContent = '♥'; btn.classList.add('active'); }
+                else { btn.textContent = '♡'; btn.classList.remove('active'); }
             });
         }
 
         // ================================================================
-        // FETCH & RENDER PRODUCTS FROM FIREBASE
+        // RENDER PRODUCT CARD
         // ================================================================
-        async function loadProducts() {
-            try {
-                // Get latest products
-                const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
-                const querySnapshot = await getDocs(q);
-                
+        function renderProductCard(p) {
+            const price = Number(p.price || 0).toLocaleString('en-IN');
+            const oldPrice = p.oldPrice && Number(p.oldPrice) > Number(p.price) ? `<span class="price-old">₹${Number(p.oldPrice).toLocaleString('en-IN')}</span>` : '';
+            const tag = p.tag ? `<span class="tag">${p.tag}</span>` : '';
+            const rating = Math.max(0, Math.min(5, Math.round(Number(p.rating) || 5)));
+            const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+            const url = `/products/${p.slug || p.id}`;
+            const img = p.image || '';
+            const inStock = Number(p.stock) > 0;
+            
+            const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+            return `
+                <div class="product-card">
+                    <div class="product-image">
+                        <a href="${url}"><img src="${esc(img)}" alt="${esc(p.name)}" loading="lazy" /></a>
+                        ${tag}
+                        <button class="wishlist-btn" data-product-id="${esc(p.id)}" aria-label="Add to wishlist">♡</button>
+                    </div>
+                    <div class="product-info">
+                        <a href="${url}" style="text-decoration:none;color:inherit;">
+                            <div class="name">${esc(p.name)}</div>
+                            <div class="variant">${esc(p.variant || 'Saree')}</div>
+                        </a>
+                        <div class="price-row">
+                            <span class="price">₹${price}</span>
+                            ${oldPrice}
+                        </div>
+                        <div class="rating">
+                            <span class="stars">${stars}</span>
+                            <span class="count">(${p.reviews || 0})</span>
+                        </div>
+                        <button class="btn-add" 
+                            data-product-id="${esc(p.id)}"
+                            data-name="${esc(p.name)}"
+                            data-variant="${esc(p.variant || '')}"
+                            data-price="${Number(p.price) || 0}"
+                            data-image="${esc(img)}"
+                            ${!inStock ? 'disabled style="background:#bbb;cursor:not-allowed;"' : ''}>
+                            ${inStock ? 'Add to Cart' : 'Out of Stock'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ================================================================
+        // FETCH & RENDER (REAL-TIME WITH onSnapshot)
+        // ================================================================
+        function loadLiveProducts() {
+            if (!productGrid) return;
+            
+            const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+            
+            // onSnapshot automatically updates UI when database changes
+            onSnapshot(q, (snapshot) => {
                 let products = [];
-                querySnapshot.forEach((doc) => {
+                snapshot.forEach((doc) => {
                     products.push({ id: doc.id, ...doc.data() });
                 });
 
@@ -3121,116 +3122,56 @@
                     return;
                 }
 
-                // Render up to 4 products (or all if you want)
-                const displayProducts = products.slice(0, 4);
+                // Display first 4 featured products (or all if none featured)
+                let displayProducts = products.filter(p => p.featured !== false).slice(0, 4);
+                if(displayProducts.length === 0) displayProducts = products.slice(0, 4);
 
-                productGrid.innerHTML = displayProducts.map(p => {
-                    const price = Number(p.price || 0).toLocaleString('en-IN');
-                    const oldPrice = p.oldPrice && Number(p.oldPrice) > Number(p.price)
-                        ? `<span class="price-old">₹${Number(p.oldPrice).toLocaleString('en-IN')}</span>` : '';
-                    const tag = p.tag ? `<span class="tag">${p.tag}</span>` : '';
-                    const url = `/products/${p.slug || p.id}`;
-                    const img = p.image || 'https://via.placeholder.com/300x400?text=No+Image';
-                    
-                    // Generate stars
-                    const rating = Math.max(0, Math.min(5, Math.round(Number(p.rating) || 5)));
-                    const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
-
-                    return `
-                        <div class="product-card">
-                            <div class="product-image">
-                                <a href="${url}">
-                                    <img src="${img}" alt="${p.name}" loading="lazy" />
-                                </a>
-                                ${tag}
-                                <button class="wishlist-btn" data-product-id="${p.id}" aria-label="Add to wishlist">♡</button>
-                            </div>
-                            <div class="product-info">
-                                <a href="${url}" style="text-decoration:none;color:inherit;">
-                                    <div class="name">${p.name}</div>
-                                    <div class="variant">${p.variant || 'Saree'}</div>
-                                </a>
-                                <div class="price-row">
-                                    <span class="price">₹${price}</span>
-                                    ${oldPrice}
-                                </div>
-                                <div class="rating">
-                                    <span class="stars">${stars}</span>
-                                    <span class="count">(${p.reviews || 0})</span>
-                                </div>
-                                <button class="btn-add" 
-                                    data-product-id="${p.id}" 
-                                    data-name="${p.name}" 
-                                    data-variant="${p.variant || ''}" 
-                                    data-price="${p.price}" 
-                                    data-image="${img}">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-                // Bind wishlist after render
+                productGrid.innerHTML = displayProducts.map(renderProductCard).join('');
                 updateWishlistButtons();
-                
-                // Bind Add to Cart Events
-                bindCartEvents();
-
-            } catch (error) {
+            }, (error) => {
                 console.error("Error loading products:", error);
-                productGrid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: red;">Failed to load products. Please try again later.</p>`;
-            }
+                productGrid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: red;">Failed to load products.</p>`;
+            });
         }
 
         // ================================================================
-        // EVENT BINDINGS (Dynamic)
+        // EVENT DELEGATION (For dynamic elements)
         // ================================================================
-        function bindCartEvents() {
+        document.addEventListener('click', (e) => {
             // Add to Cart
-            document.querySelectorAll('.btn-add').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
+            const addBtn = e.target.closest('.btn-add');
+            if (addBtn && !addBtn.disabled) {
+                e.preventDefault();
+                const productId = addBtn.dataset.productId;
+                let cart = getCart();
+                const existing = cart.find(item => item.id === productId);
+                
+                if (existing) {
+                    existing.quantity = (existing.quantity || 1) + 1;
+                } else {
+                    cart.push({
+                        id: productId,
+                        name: addBtn.dataset.name,
+                        variant: addBtn.dataset.variant,
+                        price: parseFloat(addBtn.dataset.price),
+                        image: addBtn.dataset.image,
+                        quantity: 1
+                    });
+                }
+                saveCart(cart);
+                window.location.href = 'cart.html';
+                return;
+            }
 
-                    const productId = this.dataset.productId;
-                    const productName = this.dataset.name;
-                    const productVariant = this.dataset.variant;
-                    const productPrice = parseFloat(this.dataset.price);
-                    const productImage = this.dataset.image;
-
-                    if (!productId) return;
-
-                    let cart = getCart();
-                    const existing = cart.find(item => item.id === productId);
-                    if (existing) {
-                        existing.quantity = (existing.quantity || 1) + 1;
-                    } else {
-                        cart.push({
-                            id: productId,
-                            name: productName,
-                            variant: productVariant,
-                            price: productPrice,
-                            image: productImage,
-                            quantity: 1
-                        });
-                    }
-
-                    saveCart(cart);
-                    window.location.href = 'cart.html';
-                });
-            });
-
-            // Wishlist
-            document.querySelectorAll('.wishlist-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const id = this.dataset.productId;
-                    toggleWishlist(id);
-                });
-            });
-        }
+            // Wishlist Toggle
+            const wishBtn = e.target.closest('.wishlist-btn');
+            if (wishBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleWishlist(wishBtn.dataset.productId);
+                return;
+            }
+        });
 
         // ================================================================
         // MOBILE MENU & UI
@@ -3250,11 +3191,8 @@
         });
 
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 10) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
+            if (window.scrollY > 10) header.classList.add('scrolled');
+            else header.classList.remove('scrolled');
         });
 
         window.addEventListener('storage', function(e) {
@@ -3270,7 +3208,8 @@
         // ================================================================
         updateCartBadge();
         updateWishlistBadge();
-        loadProducts(); // Load from Firebase
+        loadLiveProducts(); // <--- Starts real-time listener
+
     </script>
 
 </body>
