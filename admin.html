@@ -284,7 +284,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
               <h3>Inventory Management</h3>
               <div style="display: flex; gap: 8px;">
-                <button class="btn-ghost" onclick="exportInventory()">📥 Export CSV</button>
+                <button class="btn-ghost" onclick="window.exportInventory()">📥 Export CSV</button>
               </div>
             </div>
             
@@ -549,7 +549,7 @@ onAuthStateChanged(auth, (user) => {
     $('#app').classList.remove('hidden');
     $('#userEmail').textContent = user.email || '';
     $('#settingsEmail').value = user.email || '';
-    setupLiveListeners(); // <--- IMPORTANT: Realtime Listener Start
+    setupLiveListeners();
   } else {
     state.user = null;
     $('#app').classList.add('hidden');
@@ -611,46 +611,31 @@ function switchView(view) {
    LIVE DATA LISTENERS (REAL-TIME)
    ========================================================= */
 function setupLiveListeners() {
-  // 1. Listen to Products Collection
   onSnapshot(collection(db, 'products'), (snap) => {
     state.products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    
-    // Sort by latest created
     state.products.sort((a, b) => {
       const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
       const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
       return tb - ta;
     });
-
     computeStats();
-    
-    // Refresh current view
     if (state.currentView === 'dashboard') renderDashboard();
     if (state.currentView === 'products') renderProducts();
     if (state.currentView === 'inventory') renderInventory();
-  }, (error) => {
-    console.error("Products Listener Error:", error);
-  });
+  }, (error) => { console.error("Products Listener Error:", error); });
 
-  // 2. Listen to Orders Collection
   onSnapshot(collection(db, 'orders'), (snap) => {
     state.orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    
-    // Sort by latest
     state.orders.sort((a, b) => {
       const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
       const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
       return tb - ta;
     });
-
     computeStats();
-
     if (state.currentView === 'dashboard') renderDashboard();
     if (state.currentView === 'orders') renderOrders();
     if (state.currentView === 'customers') renderCustomers();
-  }, (error) => {
-    console.error("Orders Listener Error:", error);
-  });
+  }, (error) => { console.error("Orders Listener Error:", error); });
 }
 
 function computeStats() {
@@ -670,7 +655,6 @@ function computeStats() {
     customers: emails.size,
   };
   
-  // Customer derivation
   const map = new Map();
   for (const o of orders) {
     const c = o.customer || {};
@@ -902,7 +886,6 @@ async function saveProduct() {
     }
 
     closeProductModal();
-    // No need to refresh manually, onSnapshot handles it!
   } catch (e) {
     console.error(e);
     toast(e.message || 'Save failed', 'error');
@@ -917,7 +900,6 @@ async function deleteProduct(id) {
   try {
     await deleteDoc(doc(db, 'products', id));
     toast('Product deleted', 'success');
-    // onSnapshot handles UI update automatically
   } catch (e) { toast(e.message, 'error'); }
 }
 
@@ -1046,14 +1028,26 @@ function renderInventory() {
         <td><span class="badge badge-stock-${cls}">${label}</span></td>
         <td>
           <div class="actions">
-            <button class="icon-btn" onclick="adjustStock('${esc(p.id)}', -1)" title="Decrease by 1">−</button>
-            <button class="icon-btn" onclick="adjustStock('${esc(p.id)}', 1)" title="Increase by 1">+</button>
-            <button class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openStockModal('${esc(p.id)}')">Update</button>
+            <button class="icon-btn btn-adjust" data-id="${esc(p.id)}" data-delta="-1" title="Decrease by 1">−</button>
+            <button class="icon-btn btn-adjust" data-id="${esc(p.id)}" data-delta="1" title="Increase by 1">+</button>
+            <button class="btn-primary btn-update-stock" style="padding: 6px 12px; font-size: 0.8rem;" data-id="${esc(p.id)}">Update</button>
           </div>
         </td>
       </tr>
     `;
   }).join('');
+
+  // Attach Event Listeners instead of inline onclick
+  tbody.querySelectorAll('.btn-adjust').forEach(btn => {
+    btn.addEventListener('click', () => {
+      adjustStock(btn.dataset.id, Number(btn.dataset.delta));
+    });
+  });
+  tbody.querySelectorAll('.btn-update-stock').forEach(btn => {
+    btn.addEventListener('click', () => {
+      openStockModal(btn.dataset.id);
+    });
+  });
 }
 
 async function adjustStock(id, delta) {
@@ -1063,7 +1057,6 @@ async function adjustStock(id, delta) {
   
   try {
     await updateDoc(doc(db, 'products', id), { stock: newStock, updatedAt: serverTimestamp() });
-    // onSnapshot will automatically trigger re-render!
   } catch (e) {
     toast(e.message, 'error');
   }
@@ -1093,7 +1086,8 @@ async function setStock(id, num) {
   }
 }
 
-function exportInventory() {
+// Export Inventory to CSV
+window.exportInventory = function() {
   const products = state.products;
   if (!products.length) return toast('No data to export', 'error');
 
@@ -1112,7 +1106,11 @@ function exportInventory() {
   a.setAttribute('download', `silk-soul-inventory-${new Date().toISOString().split('T')[0]}.csv`);
   a.click();
   window.URL.revokeObjectURL(url);
-}
+};
+
+// Export renderInventory to window so filters can call it
+window.renderInventory = renderInventory;
+
 
 /* =========================================================
    CUSTOMERS
