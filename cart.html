@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Cart — Silk & Soul</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ===== SHARED BASE & HEADER/FOOTER CSS FROM INDEX ===== */
+        :root { --primary:#7B2D4E; --primary-dark:#5A1E38; --gold:#C9A96E; --gold-light:#DFC896; --gold-pale:#F4EDE0; --cream:#FCF8F3; --beige:#F0E8DE; --warm-white:#FFFCF9; --text-dark:#2D1B1A; --text-soft:#4A3A38; --text-muted:#7A6A68; --shadow:0 8px 40px rgba(45,27,26,0.08); --shadow-hover:0 16px 56px rgba(45,27,26,0.14); --radius:16px; --radius-sm:8px; --transition:0.35s cubic-bezier(0.25,0.46,0.45,0.94); --max-width:1280px; }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',sans-serif;background:var(--warm-white);color:var(--text-dark);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+        img{max-width:100%;display:block}a{text-decoration:none;color:inherit}
+        .container{max-width:var(--max-width);margin:0 auto;padding:0 24px}
+
+        /* Header */
+        .header{position:sticky;top:0;z-index:100;background:rgba(255,252,249,0.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(45,27,26,0.05);transition:box-shadow 0.4s ease}
+        .header-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;height:70px}
+        .logo{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:4px;flex-shrink:0}
+        .logo .logo-icon{font-size:1.3rem;color:var(--gold);margin-right:2px}.logo .logo-amp{color:var(--gold);font-weight:400;font-style:italic}
+        .nav{display:flex;align-items:center;gap:36px}
+        .nav a{font-size:0.9rem;font-weight:500;color:var(--text-soft);letter-spacing:0.6px;text-transform:uppercase;position:relative;padding:4px 0;transition:var(--transition)}
+        .nav a:hover{color:var(--primary)}
+        .nav-actions{display:flex;align-items:center;gap:8px}
+        .nav-actions .icon-btn{width:42px;height:42px;border-radius:50%;border:1px solid rgba(45,27,26,0.06);display:flex;align-items:center;justify-content:center;font-size:1.15rem;color:var(--text-soft);position:relative;transition:var(--transition)}
+        .nav-actions .icon-btn:hover{background:var(--gold-pale);color:var(--primary)}
+        .nav-actions .icon-btn .badge{position:absolute;top:-4px;right:-4px;background:var(--primary);color:#fff;font-size:0.6rem;font-weight:600;width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+        .mobile-toggle{display:none;background:none;border:none;font-size:1.5rem;color:var(--text-dark);cursor:pointer}
+        @media(max-width:1024px){.nav{display:none}.mobile-toggle{display:block}.nav.open{display:flex;flex-direction:column;position:absolute;top:70px;left:0;right:0;background:var(--warm-white);padding:20px;box-shadow:0 10px 20px rgba(0,0,0,0.05)}}
+
+        /* Footer */
+        .footer{padding:56px 0 32px;background:var(--text-dark);color:rgba(255,255,255,0.7);border-top:3px solid var(--gold);margin-top: 60px;}
+        .footer .container{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px}
+        @media(max-width:768px){.footer .container{grid-template-columns:1fr 1fr}}
+        @media(max-width:480px){.footer .container{grid-template-columns:1fr}}
+        .footer-brand .logo{color:#fff;margin-bottom:14px}.footer-brand .logo .logo-icon{color:var(--gold)}
+        .footer-brand p{font-size:0.9rem;line-height:1.7;color:rgba(255,255,255,0.6)}
+        .footer-col h4{color:#fff;font-weight:600;font-size:0.95rem;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:18px;position:relative;padding-bottom:8px}
+        .footer-col h4::after{content:'';position:absolute;bottom:0;left:0;width:28px;height:2px;background:var(--gold);border-radius:2px}
+        .footer-col a{display:block;font-size:0.9rem;color:rgba(255,255,255,0.5);margin-bottom:10px;transition:.3s}
+        .footer-col a:hover{color:var(--gold);transform:translateX(3px)}
+        .footer-divider{grid-column:1/-1;border:none;height:1px;background:linear-gradient(90deg,transparent,rgba(201,169,110,0.2),transparent);margin:28px 0 24px}
+        .footer-bottom{text-align:center;font-size:0.8rem;color:rgba(255,255,255,0.35);grid-column:1/-1}
+        .footer-bottom .heart{color:var(--gold)}
+
+        /* ===== CART PAGE CSS ===== */
+        .cart-page { padding: 60px 0; min-height: 60vh; }
+        .page-title { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: var(--text-dark); margin-bottom: 32px; text-align: center; }
+        
+        .cart-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 40px; align-items: start; }
+        @media (max-width: 900px) { .cart-layout { grid-template-columns: 1fr; } }
+
+        .cart-items-box { background: var(--warm-white); border-radius: var(--radius); border: 1px solid rgba(45,27,26,0.05); box-shadow: var(--shadow); overflow: hidden; }
+        .cart-item { display: flex; gap: 20px; padding: 24px; border-bottom: 1px solid rgba(45,27,26,0.06); align-items: center; }
+        .cart-item:last-child { border-bottom: none; }
+        .cart-item-img { width: 100px; height: 130px; border-radius: var(--radius-sm); object-fit: cover; background: var(--beige); flex-shrink: 0; }
+        
+        .cart-item-info { flex: 1; }
+        .cart-item-info .name { font-weight: 600; font-size: 1.1rem; color: var(--text-dark); margin-bottom: 4px; }
+        .cart-item-info .variant { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; }
+        .cart-item-info .price { font-weight: 700; color: var(--primary); font-size: 1.1rem; }
+        
+        .cart-item-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
+        .qty-controls { display: flex; align-items: center; border: 1px solid #e5ddd3; border-radius: 50px; overflow: hidden; background: var(--cream); }
+        .qty-btn { background: transparent; border: none; width: 34px; height: 34px; font-size: 1.1rem; color: var(--text-soft); cursor: pointer; transition: 0.2s; }
+        .qty-btn:hover { background: var(--gold-pale); color: var(--primary); }
+        .qty-input { width: 40px; text-align: center; border: none; background: transparent; font-weight: 600; font-family: inherit; }
+        .remove-btn { background: none; border: none; color: var(--text-muted); font-size: 0.85rem; cursor: pointer; text-decoration: underline; transition: 0.2s; }
+        .remove-btn:hover { color: #C0392B; }
+
+        .cart-summary-box { background: var(--cream); border-radius: var(--radius); padding: 28px; border: 1px solid rgba(201,169,110,0.15); box-shadow: var(--shadow); }
+        .cart-summary-box h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--text-dark); margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(45,27,26,0.08); }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 0.95rem; color: var(--text-soft); }
+        .summary-row.total { font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(45,27,26,0.08); }
+        .checkout-btn { display: block; width: 100%; background: var(--primary); color: #fff; text-align: center; padding: 16px; border-radius: 50px; font-weight: 600; font-size: 1.05rem; margin-top: 24px; border: none; cursor: pointer; transition: var(--transition); box-shadow: 0 4px 20px rgba(123,45,78,0.3); }
+        .checkout-btn:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(123,45,78,0.4); }
+        
+        .empty-cart { text-align: center; padding: 60px 20px; background: var(--warm-white); border-radius: var(--radius); box-shadow: var(--shadow); }
+        .empty-cart h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--text-dark); margin-bottom: 12px; }
+        .empty-cart p { color: var(--text-muted); margin-bottom: 24px; }
+        .btn-shop { display: inline-block; background: var(--primary); color: #fff; padding: 12px 32px; border-radius: 50px; font-weight: 600; transition: 0.3s; }
+        .btn-shop:hover { background: var(--primary-dark); }
+
+        @media (max-width: 600px) {
+            .cart-item { flex-direction: column; text-align: center; align-items: center; }
+            .cart-item-actions { align-items: center; width: 100%; flex-direction: row; justify-content: space-between; margin-top: 10px; }
+            .cart-item-img { width: 120px; height: 160px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="container header-inner">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">✦</span><span class="logo-silk">Silk</span><span class="logo-amp">&amp;</span><span class="logo-soul">Soul</span>
+            </a>
+            <nav class="nav" id="mainNav">
+                <a href="index.html#categories">Sarees</a>
+                <a href="index.html#best-sellers">Best Sellers</a>
+                <a href="index.html#testimonials">Reviews</a>
+                <a href="https://saree-demo.aamir68599.workers.dev/shop">Shop</a>
+            </nav>
+            <div class="nav-actions">
+                <a href="wishlist.html" class="icon-btn">♡<span class="badge" id="wishlistBadge">0</span></a>
+                <a href="cart.html" class="icon-btn">🛒<span class="badge" id="cartBadge">0</span></a>
+                <button class="mobile-toggle" id="mobileToggle">☰</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="cart-page">
+        <div class="container">
+            <h1 class="page-title">Your Shopping Cart</h1>
+            
+            <div id="cartContent">
+                <!-- Cart content will be rendered here via JS -->
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-brand">
+                <div class="logo"><span class="logo-icon">✦</span><span class="logo-silk">Silk</span><span class="logo-amp">&amp;</span><span class="logo-soul">Soul</span></div>
+                <p>Sarees designed for real life — where elegance meets everyday comfort.</p>
+            </div>
+            <div class="footer-col"><h4>Shop</h4><a href="#">Cotton Sarees</a><a href="#">Silk Sarees</a><a href="#">Georgette</a><a href="#">Designer Drapes</a></div>
+            <div class="footer-col"><h4>Support</h4><a href="#">Shipping Info</a><a href="#">Returns &amp; Exchanges</a><a href="#">Size Guide</a><a href="#">Contact Us</a></div>
+            <div class="footer-col"><h4>Company</h4><a href="#">About Us</a><a href="#">Our Story</a><a href="#">Sustainability</a><a href="#">Careers</a></div>
+            <hr class="footer-divider" />
+            <div class="footer-bottom">© 2026 Silk &amp; Soul. Made with <span class="heart">♥</span> for women who move the world.</div>
+        </div>
+    </footer>
+
+    <script>
+        // ==========================================
+        // CART LOGIC
+        // ==========================================
+        const cartContent = document.getElementById('cartContent');
+        const cartBadge = document.getElementById('cartBadge');
+        const wishlistBadge = document.getElementById('wishlistBadge');
+
+        function getCart() { try { return JSON.parse(localStorage.getItem('silkSoulCart') || '[]'); } catch { return []; } }
+        function saveCart(cart) { localStorage.setItem('silkSoulCart', JSON.stringify(cart)); updateBadges(); }
+        function getWishlist() { try { return JSON.parse(localStorage.getItem('silkSoulWishlist') || '[]'); } catch { return []; } }
+        
+        function updateBadges() {
+            const cart = getCart();
+            cartBadge.textContent = cart.reduce((s, i) => s + (i.quantity || 1), 0);
+            wishlistBadge.textContent = getWishlist().length;
+        }
+
+        function renderCart() {
+            const cart = getCart();
+            
+            if (cart.length === 0) {
+                cartContent.innerHTML = `
+                    <div class="empty-cart">
+                        <h2>Your cart is empty</h2>
+                        <p>Looks like you haven't added any sarees yet.</p>
+                        <a href="index.html" class="btn-shop">Continue Shopping</a>
+                    </div>
+                `;
+                return;
+            }
+
+            let subtotal = 0;
+            let itemsHtml = cart.map(item => {
+                const price = Number(item.price) || 0;
+                const qty = Number(item.quantity) || 1;
+                subtotal += price * qty;
+                const img = item.image || 'https://via.placeholder.com/100x130?text=No+Image';
+
+                return `
+                    <div class="cart-item">
+                        <img src="${img}" alt="${item.name}" class="cart-item-img" />
+                        <div class="cart-item-info">
+                            <div class="name">${item.name}</div>
+                            <div class="variant">${item.variant || ''}</div>
+                            <div class="price">₹${price.toLocaleString('en-IN')}</div>
+                        </div>
+                        <div class="cart-item-actions">
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="updateQty('${item.id}', -1)">−</button>
+                                <input type="text" class="qty-input" value="${qty}" readonly />
+                                <button class="qty-btn" onclick="updateQty('${item.id}', 1)">+</button>
+                            </div>
+                            <button class="remove-btn" onclick="removeItem('${item.id}')">Remove</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const shipping = subtotal > 999 ? 0 : 79;
+            const total = subtotal + shipping;
+
+            cartContent.innerHTML = `
+                <div class="cart-layout">
+                    <div class="cart-items-box">
+                        ${itemsHtml}
+                    </div>
+                    <div class="cart-summary-box">
+                        <h3>Order Summary</h3>
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span>₹${subtotal.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Shipping</span>
+                            <span>${shipping === 0 ? 'Free' : '₹' + shipping}</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span>₹${total.toLocaleString('en-IN')}</span>
+                        </div>
+                        <button class="checkout-btn" onclick="window.location.href='checkout.html'">Proceed to Checkout →</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateQty(id, delta) {
+            let cart = getCart();
+            const item = cart.find(i => i.id === id);
+            if (!item) return;
+            
+            item.quantity = (Number(item.quantity) || 1) + delta;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.id !== id);
+            }
+            saveCart(cart);
+            renderCart();
+        }
+
+        function removeItem(id) {
+            let cart = getCart();
+            cart = cart.filter(i => i.id !== id);
+            saveCart(cart);
+            renderCart();
+        }
+
+        // Init
+        updateBadges();
+        renderCart();
+        
+        // Mobile menu logic
+        document.getElementById('mobileToggle').addEventListener('click', () => {
+            document.getElementById('mainNav').classList.toggle('open');
+        });
+    </script>
+</body>
+</html>
