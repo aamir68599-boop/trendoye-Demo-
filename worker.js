@@ -1,5 +1,5 @@
 /**
- * Silk & Soul — Cloudflare Worker (Firestore + Full Layout)
+ * Silk & Soul — Cloudflare Worker (Firestore + Client-Side Live Stock)
  */
 
 const FS_BASE = 'https://firestore.googleapis.com/v1';
@@ -34,9 +34,7 @@ function esc(s) {
   }[c]));
 }
 
-function fmtPrice(n) {
-  return Number(n || 0).toLocaleString('en-IN');
-}
+function fmtPrice(n) { return Number(n || 0).toLocaleString('en-IN'); }
 
 async function fetchProductBySlug(env, slug) {
   const url = `${FS_BASE}/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents:runQuery?key=${env.FIREBASE_API_KEY}`;
@@ -79,6 +77,7 @@ function renderProductCard(p) {
   const tag = p.tag ? `<span class="tag">${esc(p.tag)}</span>` : '';
   const url = `/products/${p.slug || p.id}`;
   const img = p.image || 'https://placehold.co/300x400/F0E8DE/7B2D4E?text=Silk+%26+Soul';
+  const inStock = Number(p.stock) > 0;
   
   return `
     <div class="product-card">
@@ -105,8 +104,9 @@ function renderProductCard(p) {
           data-name="${esc(p.name)}" 
           data-variant="${esc(p.variant || '')}" 
           data-price="${p.price}" 
-          data-image="${esc(img)}">
-          Add to Cart
+          data-image="${esc(img)}"
+          ${!inStock ? 'disabled style="background:#bbb;cursor:not-allowed;"' : ''}>
+          ${inStock ? 'Add to Cart' : 'Out of Stock'}
         </button>
       </div>
     </div>
@@ -143,11 +143,9 @@ function renderProductPage(p, relatedProducts) {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ===== HEADER/FOOTER CSS FROM INDEX.HTML ===== */
 :root{--primary:#7B2D4E;--primary-dark:#5A1E38;--gold:#C9A96E;--gold-light:#DFC896;--gold-pale:#F4EDE0;--cream:#FCF8F3;--beige:#F0E8DE;--warm-white:#FFFCF9;--text-dark:#2D1B1A;--text-soft:#4A3A38;--text-muted:#7A6A68;--shadow:0 8px 40px rgba(45,27,26,0.08);--shadow-hover:0 16px 56px rgba(45,27,26,0.14);--radius:16px;--radius-sm:8px;--transition:0.35s cubic-bezier(0.25,0.46,0.45,0.94);}
 *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:'Inter',sans-serif;background:var(--warm-white);color:var(--text-dark);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}img{max-width:100%;display:block}a{text-decoration:none;color:inherit}.container{max-width:1280px;margin:0 auto;padding:0 24px}
 
-/* Header */
 .header{position:sticky;top:0;z-index:100;background:rgba(255,252,249,0.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(45,27,26,0.05);transition:box-shadow 0.4s ease}
 .header-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;height:70px}
 .logo{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:4px;flex-shrink:0}
@@ -162,7 +160,6 @@ function renderProductPage(p, relatedProducts) {
 .mobile-toggle{display:none;background:none;border:none;font-size:1.5rem;color:var(--text-dark);cursor:pointer}
 @media(max-width:1024px){.nav{display:none}.mobile-toggle{display:block}.nav.open{display:flex;flex-direction:column;position:absolute;top:70px;left:0;right:0;background:var(--warm-white);padding:20px;box-shadow:0 10px 20px rgba(0,0,0,0.05)}}
 
-/* Main Product Layout */
 .product-page{padding:60px 0}
 .product-layout{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
 @media(max-width:900px){.product-layout{grid-template-columns:1fr;gap:32px}}
@@ -187,7 +184,6 @@ function renderProductPage(p, relatedProducts) {
 .feature{display:flex;gap:10px;font-size:.9rem;color:var(--text-soft)}
 .feature b{color:var(--gold)}
 
-/* Related Products CSS */
 .related-products{padding:80px 0;background:var(--cream);border-top:1px solid rgba(45,27,26,0.05)}
 .related-title{font-family:'Playfair Display',serif;font-size:2rem;text-align:center;margin-bottom:40px;color:var(--text-dark)}
 .product-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
@@ -209,7 +205,6 @@ function renderProductPage(p, relatedProducts) {
 .product-info .btn-add{width:100%;padding:12px;border:none;background:var(--primary);color:#fff;border-radius:50px;font-weight:600;font-size:0.95rem;cursor:pointer;margin-top:auto}
 .product-info .btn-add:hover{background:var(--primary-dark)}
 
-/* Footer CSS */
 .footer{padding:56px 0 32px;background:var(--text-dark);color:rgba(255,255,255,0.7);border-top:3px solid var(--gold)}
 .footer .container{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px}
 @media(max-width:768px){.footer .container{grid-template-columns:1fr 1fr}}
@@ -227,15 +222,11 @@ function renderProductPage(p, relatedProducts) {
 </head>
 <body>
 
-<!-- HEADER -->
 <header class="header">
   <div class="container header-inner">
     <a href="/" class="logo"><span class="logo-icon">✦</span><span class="logo-silk">Silk</span><span class="logo-amp">&amp;</span><span class="logo-soul">Soul</span></a>
     <nav class="nav" id="mainNav">
-      <a href="/#categories">Sarees</a>
-      <a href="/#best-sellers">Best Sellers</a>
-      <a href="/#testimonials">Reviews</a>
-      <a href="/shop">Shop</a>
+      <a href="/#categories">Sarees</a><a href="/#best-sellers">Best Sellers</a><a href="/#testimonials">Reviews</a><a href="/shop">Shop</a>
     </nav>
     <div class="nav-actions">
       <a href="/wishlist.html" class="icon-btn">♡<span class="badge" id="wishlistBadge">0</span></a>
@@ -245,7 +236,6 @@ function renderProductPage(p, relatedProducts) {
   </div>
 </header>
 
-<!-- PRODUCT DETAILS -->
 <section class="product-page">
   <div class="container product-layout">
     <div class="imgbox">
@@ -261,8 +251,11 @@ function renderProductPage(p, relatedProducts) {
         ${oldPriceStr ? `<span class="price-old">₹${oldPriceStr}</span>` : ''}
       </div>
       ${discount ? `<div class="discount">Save ${discount}%</div>` : ''}
-      <p class="desc">${esc(p.description || 'Handcrafted with love, this saree blends comfort with timeless elegance. Perfect for every occasion.')}</p>
-      <div class="stock ${inStock ? 'in' : 'out'}">${inStock ? `✓ In Stock (${stock} available)` : '✗ Out of Stock'}</div>
+      <p class="desc">${esc(p.description || 'Handcrafted with love, this saree blends comfort with timeless elegance.')}</p>
+      
+      <div class="stock ${inStock ? 'in' : 'out'}" id="mainStock">
+        ${inStock ? `✓ In Stock (${stock} available)` : '✗ Out of Stock'}
+      </div>
       
       <button class="btn-add" id="mainAddBtn" ${inStock ? '' : 'disabled'}>
         ${inStock ? '✦ Add to Cart' : 'Out of Stock'}
@@ -277,15 +270,13 @@ function renderProductPage(p, relatedProducts) {
   </div>
 </section>
 
-<!-- RELATED PRODUCTS -->
 ${relatedHtml}
 
-<!-- FOOTER -->
 <footer class="footer">
   <div class="container">
     <div class="footer-brand">
       <div class="logo"><span class="logo-icon">✦</span><span class="logo-silk">Silk</span><span class="logo-amp">&amp;</span><span class="logo-soul">Soul</span></div>
-      <p>Sarees designed for real life — where elegance meets everyday comfort. Made with love for women who move.</p>
+      <p>Sarees designed for real life — where elegance meets everyday comfort.</p>
     </div>
     <div class="footer-col"><h4>Shop</h4><a href="/shop">Cotton Sarees</a><a href="/shop">Silk Sarees</a><a href="/shop">Georgette</a><a href="/shop">Designer Drapes</a></div>
     <div class="footer-col"><h4>Support</h4><a href="#">Shipping Info</a><a href="#">Returns &amp; Exchanges</a><a href="#">Size Guide</a><a href="#">Contact Us</a></div>
@@ -295,54 +286,101 @@ ${relatedHtml}
   </div>
 </footer>
 
-<script>
-// Cart Functions
-function getCart() { try { return JSON.parse(localStorage.getItem('silkSoulCart') || '[]'); } catch { return []; } }
-function saveCart(cart) { localStorage.setItem('silkSoulCart', JSON.stringify(cart)); updateCartBadge(); }
-function updateCartBadge() { document.getElementById('cartBadge').textContent = getCart().reduce((s,i)=>s+(i.quantity||1),0); }
+<!-- FIREBASE LIVE STOCK CHECKER -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// Wishlist Functions
-function getWishlist() { try { return JSON.parse(localStorage.getItem('silkSoulWishlist') || '[]'); } catch { return []; } }
-function toggleWishlist(id) { let w = getWishlist(); let i = w.indexOf(id); if(i>-1) w.splice(i,1); else w.push(id); localStorage.setItem('silkSoulWishlist', JSON.stringify(w)); location.reload(); }
+  const firebaseConfig = {
+    apiKey: "AIzaSyAV_cCJFySKWCfY3zPsZMkb5Oau9BAQNlc",
+    authDomain: "silk-and-soul.firebaseapp.com",
+    projectId: "silk-and-soul",
+    storageBucket: "silk-and-soul.firebasestorage.app",
+    messagingSenderId: "925303527952",
+    appId: "1:925303527952:web:111e2a00f85cb9859e4895"
+  };
 
-// Main Product Add to Cart
-const mainBtn = document.getElementById('mainAddBtn');
-if (mainBtn && !mainBtn.disabled) {
-  mainBtn.addEventListener('click', () => {
-    const product = ${cartPayload};
-    let cart = getCart();
-    const existing = cart.find(i => i.id === product.id);
-    if (existing) existing.quantity = (existing.quantity || 1) + 1;
-    else cart.push({ ...product, quantity: 1 });
-    saveCart(cart);
-    window.location.href = '/cart.html';
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const productId = "${p.id}";
+
+  // LIVE LISTENER FOR THIS SPECIFIC PRODUCT
+  onSnapshot(doc(db, "products", productId), (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const stock = Number(data.stock) || 0;
+      const inStock = stock > 0;
+      
+      const stockEl = document.getElementById('mainStock');
+      const btnEl = document.getElementById('mainAddBtn');
+
+      if (inStock) {
+        stockEl.className = 'stock in';
+        stockEl.innerHTML = `✓ In Stock (${stock} available)`;
+        btnEl.disabled = false;
+        btnEl.innerHTML = '✦ Add to Cart';
+        btnEl.style.background = '';
+        btnEl.style.cursor = 'pointer';
+      } else {
+        stockEl.className = 'stock out';
+        stockEl.innerHTML = '✗ Out of Stock';
+        btnEl.disabled = true;
+        btnEl.innerHTML = 'Out of Stock';
+        btnEl.style.background = '#bbb';
+        btnEl.style.cursor = 'not-allowed';
+      }
+    }
   });
-}
 
-// Related Products Event Delegation
-document.addEventListener('click', (e) => {
-  const addBtn = e.target.closest('.product-info .btn-add');
-  if (addBtn) {
-    e.preventDefault();
-    const id = addBtn.dataset.productId;
-    let cart = getCart();
-    const existing = cart.find(i => i.id === id);
-    if (existing) existing.quantity = (existing.quantity || 1) + 1;
-    else cart.push({ id, name: addBtn.dataset.name, variant: addBtn.dataset.variant, price: parseFloat(addBtn.dataset.price), image: addBtn.dataset.image, quantity: 1 });
-    saveCart(cart);
-    window.location.href = '/cart.html';
-    return;
+  // Cart Functions
+  function getCart() { try { return JSON.parse(localStorage.getItem('silkSoulCart') || '[]'); } catch { return []; } }
+  function saveCart(cart) { localStorage.setItem('silkSoulCart', JSON.stringify(cart)); updateCartBadge(); }
+  function updateCartBadge() { document.getElementById('cartBadge').textContent = getCart().reduce((s,i)=>s+(i.quantity||1),0); }
+  function getWishlist() { try { return JSON.parse(localStorage.getItem('silkSoulWishlist') || '[]'); } catch { return []; } }
+
+  const mainBtn = document.getElementById('mainAddBtn');
+  if (mainBtn) {
+    mainBtn.addEventListener('click', () => {
+      if (mainBtn.disabled) return;
+      const product = ${cartPayload};
+      let cart = getCart();
+      const existing = cart.find(i => i.id === product.id);
+      if (existing) existing.quantity = (existing.quantity || 1) + 1;
+      else cart.push({ ...product, quantity: 1 });
+      saveCart(cart);
+      window.location.href = '/cart.html';
+    });
   }
-  const wishBtn = e.target.closest('.wishlist-btn');
-  if (wishBtn) { e.preventDefault(); toggleWishlist(wishBtn.dataset.productId); }
-});
 
-// Init
-updateCartBadge();
-document.getElementById('wishlistBadge').textContent = getWishlist().length;
-document.getElementById('mobileToggle').addEventListener('click', () => {
-  document.getElementById('mainNav').classList.toggle('open');
-});
+  document.addEventListener('click', (e) => {
+    const addBtn = e.target.closest('.product-info .btn-add');
+    if (addBtn && !addBtn.disabled) {
+      e.preventDefault();
+      const id = addBtn.dataset.productId;
+      let cart = getCart();
+      const existing = cart.find(i => i.id === id);
+      if (existing) existing.quantity = (existing.quantity || 1) + 1;
+      else cart.push({ id, name: addBtn.dataset.name, variant: addBtn.dataset.variant, price: parseFloat(addBtn.dataset.price), image: addBtn.dataset.image, quantity: 1 });
+      saveCart(cart);
+      window.location.href = '/cart.html';
+      return;
+    }
+    const wishBtn = e.target.closest('.wishlist-btn');
+    if (wishBtn) { 
+        e.preventDefault(); 
+        let w = getWishlist(); 
+        let i = w.indexOf(wishBtn.dataset.productId); 
+        if(i>-1) w.splice(i,1); else w.push(wishBtn.dataset.productId); 
+        localStorage.setItem('silkSoulWishlist', JSON.stringify(w)); 
+        document.getElementById('wishlistBadge').textContent = w.length;
+    }
+  });
+
+  updateCartBadge();
+  document.getElementById('wishlistBadge').textContent = getWishlist().length;
+  document.getElementById('mobileToggle').addEventListener('click', () => {
+    document.getElementById('mainNav').classList.toggle('open');
+  });
 </script>
 </body>
 </html>`;
@@ -362,7 +400,6 @@ export default {
           return new Response(`<h1 style="text-align:center;padding:50px;font-family:sans-serif">Product Not Found. <a href="/">Go Home</a></h1>`, { status: 404, headers: { 'Content-Type': 'text/html' } });
         }
         
-        // Fetch related products of the same category
         const related = await fetchRelatedProducts(env, product.category, product.id);
         
         return new Response(renderProductPage(product, related), { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
