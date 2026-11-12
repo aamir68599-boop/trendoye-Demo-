@@ -104,6 +104,24 @@
         .success-modal h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--text-dark); margin-bottom: 8px; }
         .success-modal p { color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem; }
         .success-modal .order-id { font-weight: 700; color: var(--primary); font-size: 1.1rem; }
+
+        /* ===== UPI QR MODAL ===== */
+        .upi-modal { background: var(--warm-white); border-radius: 20px; padding: 34px 26px 28px; max-width: 420px; width: 100%; text-align: center; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: popIn 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .upi-close { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 50%; border: none; background: var(--beige); color: var(--text-soft); font-size: 1rem; line-height: 1; cursor: pointer; transition: 0.25s; }
+        .upi-close:hover { background: var(--primary); color: #fff; }
+        .upi-modal h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--text-dark); margin-bottom: 4px; }
+        .upi-amount { font-size: 1.9rem; font-weight: 700; color: var(--primary); margin-bottom: 2px; }
+        .upi-scan { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; }
+        .qr-box { background: #fff; border: 2px solid var(--gold-light); border-radius: 14px; padding: 10px; display: inline-block; margin-bottom: 14px; box-shadow: 0 4px 18px rgba(201,169,110,0.18); }
+        .qr-box img { width: 220px; height: 220px; display: block; border-radius: 6px; }
+        .upi-id { font-size: 0.9rem; color: var(--text-soft); margin-bottom: 6px; }
+        .upi-id strong { color: var(--primary); letter-spacing: 0.4px; }
+        .upi-apps { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px; letter-spacing: 0.3px; }
+        .upi-app-link { display: inline-block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--primary); border: 1.5px dashed var(--gold); padding: 9px 20px; border-radius: 50px; transition: 0.25s; }
+        .upi-app-link:hover { background: var(--gold-pale); }
+        .upi-modal .place-order-btn { margin-top: 16px; }
+        .upi-note { font-size: 0.74rem; color: var(--text-muted); margin-top: 12px; line-height: 1.5; }
+        @media (max-width: 420px) { .qr-box img { width: 190px; height: 190px; } }
     </style>
 </head>
 <body>
@@ -218,6 +236,24 @@
         </div>
     </main>
 
+    <!-- UPI QR Modal -->
+    <div class="modal-overlay" id="upiModal">
+        <div class="upi-modal">
+            <button class="upi-close" id="upiClose" aria-label="Close">✕</button>
+            <h2>Pay via UPI</h2>
+            <div class="upi-amount">₹<span id="upiAmount">0</span></div>
+            <p class="upi-scan">Scan this QR code with any UPI app</p>
+            <div class="qr-box">
+                <img id="upiQrImg" src="" alt="UPI QR Code" />
+            </div>
+            <p class="upi-id">UPI ID: <strong id="upiIdText">8979401469@upi</strong></p>
+            <div class="upi-apps">Google Pay • PhonePe • Paytm • BHIM</div>
+            <a class="upi-app-link" id="upiAppLink" href="#">Open in UPI App ↗</a>
+            <button class="place-order-btn" id="upiPaidBtn">✅ I have paid — Confirm Order</button>
+            <p class="upi-note">Pay the exact amount shown above, then tap the confirm button.<br>Your order will be placed instantly.</p>
+        </div>
+    </div>
+
     <!-- Success Modal -->
     <div class="modal-overlay" id="successModal">
         <div class="success-modal">
@@ -262,6 +298,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // ====== UPI CONFIG (yaha apni UPI ID badal sakte ho) ======
+        const UPI_ID = "8979401469@upi";      // <-- apni UPI ID
+        const UPI_NAME = "Silk & Soul";        // <-- payee name
+
         // DOM Refs
         const summaryItems = document.getElementById('summaryItems');
         const sumSubtotal = document.getElementById('sumSubtotal');
@@ -271,11 +311,21 @@
         const successModal = document.getElementById('successModal');
         const successOrderId = document.getElementById('successOrderId');
 
+        // UPI modal refs
+        const upiModal = document.getElementById('upiModal');
+        const upiClose = document.getElementById('upiClose');
+        const upiQrImg = document.getElementById('upiQrImg');
+        const upiAmount = document.getElementById('upiAmount');
+        const upiIdText = document.getElementById('upiIdText');
+        const upiAppLink = document.getElementById('upiAppLink');
+        const upiPaidBtn = document.getElementById('upiPaidBtn');
+
         let cart = [];
         let currentSubtotal = 0;
         let currentShipping = 0;
         let currentTotal = 0;
         let selectedPayment = 'cod';
+        let isProcessing = false;
 
         function getCart() { try { return JSON.parse(localStorage.getItem('silkSoulCart') || '[]'); } catch { return []; } }
         function getWishlist() { try { return JSON.parse(localStorage.getItem('silkSoulWishlist') || '[]'); } catch { return []; } }
@@ -330,37 +380,92 @@
                 selectedRadio.checked = true;
                 selectedRadio.closest('.payment-option').classList.add('active');
             }
+            // UPI select karte hi QR code show hoga
+            if (method === 'upi') {
+                openUpiModal();
+            }
         };
 
-        // Handle Place Order
-        placeOrderBtn.addEventListener('click', async () => {
-            // Basic validation
-            const name = document.getElementById('custName').value.trim();
-            const email = document.getElementById('custEmail').value.trim();
-            const phone = document.getElementById('custPhone').value.trim();
-            const address = document.getElementById('custAddress').value.trim();
-            const city = document.getElementById('custCity').value.trim();
-            const state = document.getElementById('custState').value.trim();
-            const pincode = document.getElementById('custPincode').value.trim();
+        // ====== UPI QR LOGIC ======
+        function buildUpiUri(amount) {
+            const params = [
+                `pa=${encodeURIComponent(UPI_ID)}`,
+                `pn=${encodeURIComponent(UPI_NAME)}`,
+                `am=${Number(amount).toFixed(2)}`,
+                `cu=INR`,
+                `tn=${encodeURIComponent('Silk & Soul Order')}`
+            ];
+            return `upi://pay?${params.join('&')}`;
+        }
 
-            if (!name || !email || !phone || !address || !city || !state || !pincode) {
+        function openUpiModal() {
+            if (!currentTotal || currentTotal <= 0) {
+                alert("Your cart is empty.");
+                return;
+            }
+            const uri = buildUpiUri(currentTotal);
+            upiIdText.textContent = UPI_ID;
+            upiAmount.textContent = Number(currentTotal).toLocaleString('en-IN');
+            upiQrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data=" + encodeURIComponent(uri);
+            upiAppLink.href = uri;
+            upiModal.classList.add('show');
+        }
+
+        function closeUpiModal() {
+            upiModal.classList.remove('show');
+        }
+
+        upiClose.addEventListener('click', closeUpiModal);
+        upiModal.addEventListener('click', (e) => {
+            if (e.target === upiModal) closeUpiModal();
+        });
+
+        // ====== FORM VALIDATION ======
+        function getShippingData() {
+            return {
+                name: document.getElementById('custName').value.trim(),
+                email: document.getElementById('custEmail').value.trim(),
+                phone: document.getElementById('custPhone').value.trim(),
+                address: document.getElementById('custAddress').value.trim(),
+                city: document.getElementById('custCity').value.trim(),
+                state: document.getElementById('custState').value.trim(),
+                pincode: document.getElementById('custPincode').value.trim()
+            };
+        }
+
+        function isShippingValid(d) {
+            return !!(d.name && d.email && d.phone && d.address && d.city && d.state && d.pincode);
+        }
+
+        // ====== PLACE ORDER (Firestore) ======
+        async function processOrder(paymentMethod, btnEl) {
+            if (isProcessing) return;
+
+            const ship = getShippingData();
+            if (!isShippingValid(ship)) {
                 alert("Please fill in all required shipping details.");
+                closeUpiModal();
+                document.getElementById('custName').scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
 
+            isProcessing = true;
+            const btn = btnEl || placeOrderBtn;
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
             placeOrderBtn.disabled = true;
-            placeOrderBtn.textContent = 'Processing...';
 
             try {
                 const orderId = 'ORD-' + Date.now().toString(36).toUpperCase();
-                const fullAddress = `${address}, ${city}, ${state} - ${pincode}`;
+                const fullAddress = `${ship.address}, ${ship.city}, ${ship.state} - ${ship.pincode}`;
 
                 const orderData = {
                     orderId: orderId,
                     customer: {
-                        name: name,
-                        email: email,
-                        phone: phone,
+                        name: ship.name,
+                        email: ship.email,
+                        phone: ship.phone,
                         address: fullAddress
                     },
                     items: cart.map(i => ({
@@ -374,7 +479,8 @@
                     subtotal: currentSubtotal,
                     shipping: currentShipping,
                     total: currentTotal,
-                    paymentMethod: selectedPayment,
+                    paymentMethod: paymentMethod,
+                    upiId: paymentMethod === 'upi' ? UPI_ID : null,
                     status: 'pending',
                     createdAt: serverTimestamp()
                 };
@@ -384,6 +490,9 @@
 
                 // Clear Cart
                 localStorage.removeItem('silkSoulCart');
+
+                // Close UPI modal if open
+                closeUpiModal();
 
                 // Show Success Modal
                 successOrderId.textContent = orderId;
@@ -397,9 +506,32 @@
             } catch (error) {
                 console.error("Error placing order:", error);
                 alert("Failed to place order. Please try again.");
+                btn.disabled = false;
+                btn.textContent = originalText;
                 placeOrderBtn.disabled = false;
-                placeOrderBtn.textContent = 'Place Order';
+                isProcessing = false;
             }
+        }
+
+        // ====== PLACE ORDER BUTTON ======
+        placeOrderBtn.addEventListener('click', () => {
+            const ship = getShippingData();
+            if (!isShippingValid(ship)) {
+                alert("Please fill in all required shipping details.");
+                document.getElementById('custName').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+            if (selectedPayment === 'upi') {
+                // UPI => pehle QR dikhao, payment ke baad order place hoga
+                openUpiModal();
+                return;
+            }
+            processOrder(selectedPayment, placeOrderBtn);
+        });
+
+        // ====== UPI PAID / CONFIRM BUTTON ======
+        upiPaidBtn.addEventListener('click', () => {
+            processOrder('upi', upiPaidBtn);
         });
 
         // Init
