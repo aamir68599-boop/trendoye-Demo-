@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root{
   --primary:#7B2D4E; --primary-dark:#5A1E38; --gold:#C9A96E; --gold-light:#DFC896;
@@ -92,6 +93,9 @@ code{background:#f0e8de;padding:1px 6px;border-radius:4px;font-size:.85em}
 .stat .label{font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-muted);margin-bottom:10px}
 .stat .value{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--text-dark);line-height:1.1}
 .stat .sub{font-size:.8rem;color:var(--text-muted);margin-top:6px}
+.stat .trend{font-size:.75rem;font-weight:600;margin-top:6px}
+.stat .trend.up{color:var(--green)}
+.stat .trend.down{color:var(--red)}
 
 table{width:100%;border-collapse:collapse;font-size:.88rem}
 table th{text-align:left;padding:12px 10px;font-weight:600;color:var(--text-muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid rgba(45,27,26,.08);white-space:nowrap}
@@ -112,6 +116,10 @@ table tr:hover{background:rgba(201,169,110,.04)}
 .badge-stock-in{background:#E8F6EC;color:var(--green)}
 .badge-stock-low{background:#FEF3E2;color:var(--amber)}
 .badge-stock-out{background:#FBEAEA;color:var(--red)}
+.badge-approved{background:#E8F6EC;color:var(--green)}
+.badge-rejected{background:#FBEAEA;color:var(--red)}
+.badge-active{background:#E8F6EC;color:var(--green)}
+.badge-inactive{background:#EFEAE4;color:var(--text-muted)}
 .actions{display:flex;gap:6px;flex-wrap:wrap}
 .icon-btn{width:32px;height:32px;border-radius:8px;border:1px solid #e5ddd3;background:var(--warm-white);display:inline-flex;align-items:center;justify-content:center;font-size:.95rem;transition:.2s;color:var(--text-soft);text-decoration:none}
 .icon-btn:hover{background:var(--cream);border-color:var(--gold);color:var(--primary)}
@@ -155,6 +163,63 @@ table tr:hover{background:rgba(201,169,110,.04)}
 .toast.show{transform:translateY(0)}
 .toast.success{background:var(--green)}
 .toast.error{background:var(--red)}
+
+/* ===== NEW: Notification bell ===== */
+.notif-wrapper{position:relative;display:inline-block}
+.notif-btn{position:relative;width:38px;height:38px;border-radius:10px;border:1px solid #e5ddd3;background:var(--warm-white);font-size:1rem;transition:.2s}
+.notif-btn:hover{background:var(--cream);border-color:var(--gold)}
+.notif-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:.65rem;font-weight:700;min-width:18px;height:18px;padding:0 5px;border-radius:50px;display:flex;align-items:center;justify-content:center}
+.notif-dropdown{position:absolute;top:46px;right:0;background:var(--warm-white);border-radius:12px;box-shadow:0 16px 48px rgba(45,27,26,.15);width:320px;max-height:420px;overflow-y:auto;z-index:60;border:1px solid rgba(45,27,26,.06);animation:slideUp .2s}
+.notif-dropdown h4{padding:14px 16px 10px;font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);border-bottom:1px solid rgba(45,27,26,.06)}
+.notif-item{padding:12px 16px;border-bottom:1px solid rgba(45,27,26,.04);font-size:.85rem;cursor:pointer;transition:.2s}
+.notif-item:hover{background:var(--cream)}
+.notif-item strong{color:var(--text-dark);display:block;margin-bottom:2px}
+.notif-item span{font-size:.75rem;color:var(--text-muted)}
+.notif-empty{padding:24px 16px;text-align:center;color:var(--text-muted);font-size:.85rem}
+
+/* ===== NEW: Filter bars ===== */
+.filter-bar{display:flex;gap:12px;flex-wrap:wrap;background:var(--cream);padding:12px;border-radius:8px;border:1px solid #e5ddd3}
+.filter-bar input,.filter-bar select{padding:8px 12px;border:1px solid #e5ddd3;border-radius:6px;font-family:inherit;font-size:.85rem}
+.filter-bar input:focus,.filter-bar select:focus{outline:none;border-color:var(--primary)}
+
+/* ===== NEW: Charts ===== */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+@media(max-width:900px){.chart-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--warm-white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border:1px solid rgba(45,27,26,.05)}
+.chart-card h3{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:14px;color:var(--text-dark)}
+.chart-wrap{position:relative;height:260px}
+.chart-wrap-sm{position:relative;height:200px}
+
+/* ===== NEW: Order detail ===== */
+.order-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+@media(max-width:640px){.order-detail-grid{grid-template-columns:1fr}}
+.detail-block{background:var(--cream);border-radius:10px;padding:14px 16px;border:1px solid rgba(45,27,26,.04)}
+.detail-block .label{font-size:.7rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);font-weight:600;margin-bottom:8px}
+.detail-block .val{font-size:.88rem;color:var(--text-soft);line-height:1.6}
+.detail-block .val strong{color:var(--text-dark)}
+.timeline{display:flex;justify-content:space-between;margin:18px 0;position:relative;padding:0 8px}
+.timeline::before{content:'';position:absolute;top:14px;left:30px;right:30px;height:2px;background:#e5ddd3;z-index:0}
+.timeline-step{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;z-index:1;flex:1}
+.timeline-dot{width:28px;height:28px;border-radius:50%;background:#e5ddd3;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700}
+.timeline-step.done .timeline-dot{background:var(--green)}
+.timeline-step.active .timeline-dot{background:var(--gold)}
+.timeline-step.cancelled .timeline-dot{background:var(--red)}
+.timeline-step span{font-size:.7rem;color:var(--text-muted);font-weight:500;text-align:center}
+.timeline-step.done span,.timeline-step.active span{color:var(--text-dark);font-weight:600}
+
+/* ===== NEW: Star rating ===== */
+.stars{color:#E8B44A;font-size:.95rem;letter-spacing:1px}
+.stars .off{color:#DDD5C8}
+
+/* print */
+@media print {
+  body *{visibility:hidden}
+  #orderDetailModal, #orderDetailModal *{visibility:visible}
+  #orderDetailModal{position:absolute;top:0;left:0;width:100%;background:#fff;padding:0}
+  #orderDetailModal .modal{box-shadow:none;max-width:100%}
+  #orderDetailModal .modal-footer, #orderDetailModal .modal-close{display:none !important}
+  #orderDetailModal .modal-body{max-height:none;overflow:visible}
+}
 </style>
 </head>
 <body>
@@ -192,6 +257,9 @@ table tr:hover{background:rgba(201,169,110,.04)}
       <a data-view="orders">🧾 <span class="label">Orders</span></a>
       <a data-view="inventory">📈 <span class="label">Inventory</span></a>
       <a data-view="customers">👥 <span class="label">Customers</span></a>
+      <a data-view="reports">📊 <span class="label">Reports</span></a>
+      <a data-view="coupons">🎟️ <span class="label">Coupons</span></a>
+      <a data-view="reviews">⭐ <span class="label">Reviews</span></a>
       <a data-view="settings">⚙️ <span class="label">Settings</span></a>
     </nav>
     <button class="logout-btn" id="logoutBtn">Logout</button>
@@ -201,6 +269,12 @@ table tr:hover{background:rgba(201,169,110,.04)}
     <header class="topbar">
       <h1 id="pageTitle">Dashboard</h1>
       <div class="topbar-actions">
+        <div class="notif-wrapper">
+          <button class="notif-btn" id="notifBtn" title="Notifications">
+            🔔<span class="notif-badge hidden" id="notifBadge">0</span>
+          </button>
+          <div class="notif-dropdown hidden" id="notifDropdown"></div>
+        </div>
         <span class="user-email" id="userEmail"></span>
         <a href="/" target="_blank" class="btn-ghost">View Store ↗</a>
       </div>
@@ -211,6 +285,19 @@ table tr:hover{background:rgba(201,169,110,.04)}
       <!-- DASHBOARD -->
       <section id="view-dashboard" class="view">
         <div id="statsGrid" class="stats"></div>
+
+        <!-- NEW: mini revenue chart -->
+        <div class="chart-grid" style="grid-template-columns:1fr 1fr">
+          <div class="chart-card">
+            <h3>Revenue — Last 14 Days</h3>
+            <div class="chart-wrap-sm"><canvas id="dashRevenueChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Orders by Status</h3>
+            <div class="chart-wrap-sm"><canvas id="dashStatusChart"></canvas></div>
+          </div>
+        </div>
+
         <div class="card" style="margin-bottom:24px">
           <div class="card-header">
             <h3>Recent Orders</h3>
@@ -240,9 +327,32 @@ table tr:hover{background:rgba(201,169,110,.04)}
       <!-- PRODUCTS -->
       <section id="view-products" class="view hidden">
         <div class="card">
-          <div class="card-header">
-            <h3>All Products</h3>
-            <button class="btn-primary" id="addProductBtn">+ Add Product</button>
+          <div class="card-header" style="flex-direction:column;align-items:stretch;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+              <h3>All Products</h3>
+              <div style="display:flex;gap:8px">
+                <button class="btn-ghost" onclick="window.exportProducts()">📥 Export CSV</button>
+                <button class="btn-primary" id="addProductBtn">+ Add Product</button>
+              </div>
+            </div>
+            <div class="filter-bar">
+              <input type="text" id="prodSearch" placeholder="🔍 Search products…" style="flex:1;min-width:200px" oninput="renderProducts()" />
+              <select id="prodCategoryFilter" onchange="renderProducts()">
+                <option value="all">All Categories</option>
+                <option value="cotton">Cotton Comfort</option>
+                <option value="silk">Silk Luxe</option>
+                <option value="georgette">Georgette &amp; Chiffon</option>
+                <option value="designer">Designer Drapes</option>
+                <option value="general">General</option>
+              </select>
+              <select id="prodSort" onchange="renderProducts()">
+                <option value="newest">Newest First</option>
+                <option value="price-asc">Price: Low → High</option>
+                <option value="price-desc">Price: High → Low</option>
+                <option value="name">Name A–Z</option>
+                <option value="stock">Stock: Low → High</option>
+              </select>
+            </div>
           </div>
           <div class="table-wrap">
             <table>
@@ -261,9 +371,27 @@ table tr:hover{background:rgba(201,169,110,.04)}
       <!-- ORDERS -->
       <section id="view-orders" class="view hidden">
         <div class="card">
-          <div class="card-header">
-            <h3>All Orders</h3>
-            <button class="btn-primary" id="testOrderBtn">+ Create Test Order</button>
+          <div class="card-header" style="flex-direction:column;align-items:stretch;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+              <h3>All Orders</h3>
+              <div style="display:flex;gap:8px">
+                <button class="btn-ghost" onclick="window.exportOrders()">📥 Export CSV</button>
+                <button class="btn-primary" id="testOrderBtn">+ Create Test Order</button>
+              </div>
+            </div>
+            <div class="filter-bar">
+              <input type="text" id="orderSearch" placeholder="🔍 Search order ID / customer / email…" style="flex:1;min-width:200px" oninput="renderOrders()" />
+              <select id="orderStatusFilter" onchange="renderOrders()">
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <input type="date" id="orderDateFrom" onchange="renderOrders()" title="From date" />
+              <input type="date" id="orderDateTo" onchange="renderOrders()" title="To date" />
+            </div>
           </div>
           <div class="table-wrap">
             <table>
@@ -287,18 +415,15 @@ table tr:hover{background:rgba(201,169,110,.04)}
                 <button class="btn-ghost" onclick="window.exportInventory()">📥 Export CSV</button>
               </div>
             </div>
-            
-            <div style="display: flex; gap: 12px; flex-wrap: wrap; background: var(--cream); padding: 12px; border-radius: 8px; border: 1px solid #e5ddd3;">
-              <input type="text" id="invSearch" placeholder="🔍 Search by product name..." style="flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid #e5ddd3; border-radius: 6px; font-family: inherit;" oninput="renderInventory()">
-              
-              <select id="invStatusFilter" style="padding: 8px 12px; border: 1px solid #e5ddd3; border-radius: 6px; font-family: inherit;" onchange="renderInventory()">
+            <div class="filter-bar">
+              <input type="text" id="invSearch" placeholder="🔍 Search by product name..." style="flex: 1; min-width: 200px;" oninput="renderInventory()">
+              <select id="invStatusFilter" onchange="renderInventory()">
                 <option value="all">All Stock Status</option>
                 <option value="in">In Stock</option>
-                <option value="low">Low Stock (< 5)</option>
+                <option value="low">Low Stock (&lt; 5)</option>
                 <option value="out">Out of Stock (0)</option>
               </select>
-
-              <select id="invCategoryFilter" style="padding: 8px 12px; border: 1px solid #e5ddd3; border-radius: 6px; font-family: inherit;" onchange="renderInventory()">
+              <select id="invCategoryFilter" onchange="renderInventory()">
                 <option value="all">All Categories</option>
                 <option value="cotton">Cotton Comfort</option>
                 <option value="silk">Silk Luxe</option>
@@ -308,17 +433,12 @@ table tr:hover{background:rgba(201,169,110,.04)}
               </select>
             </div>
           </div>
-          
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Image</th>
-                  <th>Product Details</th>
-                  <th>Category</th>
-                  <th>Current Stock</th>
-                  <th>Status</th>
-                  <th>Action</th>
+                  <th>Image</th><th>Product Details</th><th>Category</th>
+                  <th>Current Stock</th><th>Status</th><th>Action</th>
                 </tr>
               </thead>
               <tbody id="inventoryBody"></tbody>
@@ -330,7 +450,15 @@ table tr:hover{background:rgba(201,169,110,.04)}
       <!-- CUSTOMERS -->
       <section id="view-customers" class="view hidden">
         <div class="card">
-          <div class="card-header"><h3>Customers (from Orders)</h3></div>
+          <div class="card-header" style="flex-direction:column;align-items:stretch;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+              <h3>Customers (from Orders)</h3>
+              <button class="btn-ghost" onclick="window.exportCustomers()">📥 Export CSV</button>
+            </div>
+            <div class="filter-bar">
+              <input type="text" id="custSearch" placeholder="🔍 Search name / email / phone…" style="flex:1;min-width:200px" oninput="renderCustomers()" />
+            </div>
+          </div>
           <div class="table-wrap">
             <table>
               <thead>
@@ -338,6 +466,100 @@ table tr:hover{background:rgba(201,169,110,.04)}
                 <th>Total Spent</th><th>Last Order</th></tr>
               </thead>
               <tbody id="customersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- REPORTS (NEW) -->
+      <section id="view-reports" class="view hidden">
+        <div class="filter-bar" style="margin-bottom:20px">
+          <label style="font-size:.82rem;font-weight:600;color:var(--text-soft);align-self:center">Date Range:</label>
+          <select id="reportRange" onchange="renderReports()">
+            <option value="7">Last 7 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="180">Last 180 days</option>
+            <option value="365">Last 365 days</option>
+          </select>
+          <button class="btn-ghost" onclick="window.exportReport()" style="margin-left:auto">📥 Export Report CSV</button>
+        </div>
+
+        <div id="reportStats" class="stats"></div>
+
+        <div class="chart-grid">
+          <div class="chart-card">
+            <h3>Revenue Trend</h3>
+            <div class="chart-wrap"><canvas id="reportRevenueChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Orders by Status</h3>
+            <div class="chart-wrap"><canvas id="reportStatusChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card">
+            <h3>Top Products by Revenue</h3>
+            <div class="chart-wrap"><canvas id="reportTopProductsChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Sales by Category</h3>
+            <div class="chart-wrap"><canvas id="reportCategoryChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>🏆 Top Selling Products</h3></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Product</th><th>Units Sold</th><th>Revenue</th></tr></thead>
+              <tbody id="topProductsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- COUPONS (NEW) -->
+      <section id="view-coupons" class="view hidden">
+        <div class="card">
+          <div class="card-header">
+            <h3>Discount Coupons</h3>
+            <button class="btn-primary" id="addCouponBtn">+ Create Coupon</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Code</th><th>Type</th><th>Value</th><th>Min Order</th>
+                <th>Usage</th><th>Expires</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="couponsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- REVIEWS (NEW) -->
+      <section id="view-reviews" class="view hidden">
+        <div class="card">
+          <div class="card-header" style="flex-direction:column;align-items:stretch;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+              <h3>Product Reviews</h3>
+              <select id="reviewStatusFilter" class="filter-bar" style="padding:8px 12px;border:1px solid #e5ddd3;border-radius:6px" onchange="renderReviews()">
+                <option value="all">All Reviews</option>
+                <option value="pending">Pending Approval</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Product</th><th>Customer</th><th>Rating</th><th>Review</th>
+                <th>Status</th><th>Date</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="reviewsBody"></tbody>
             </table>
           </div>
         </div>
@@ -458,6 +680,71 @@ table tr:hover{background:rgba(201,169,110,.04)}
   </div>
 </div>
 
+<!-- NEW: ORDER DETAIL MODAL -->
+<div id="orderDetailModal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:820px">
+    <div class="modal-header">
+      <h2 id="orderDetailTitle">Order Details</h2>
+      <button class="modal-close" id="orderDetailClose">✕</button>
+    </div>
+    <div class="modal-body" id="orderDetailBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="window.print()">🖨 Print Invoice</button>
+      <button class="btn-primary" id="orderDetailDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW: COUPON MODAL -->
+<div id="couponModal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <h2 id="couponModalTitle">Create Coupon</h2>
+      <button class="modal-close" id="couponModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="couponForm" class="form-grid">
+        <input type="hidden" id="c-id" />
+        <div class="field full">
+          <label>Coupon Code *</label>
+          <input type="text" id="c-code" required placeholder="SAVE10" style="text-transform:uppercase" />
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <select id="c-type">
+            <option value="percent">Percentage (%)</option>
+            <option value="fixed">Fixed Amount (₹)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Value *</label>
+          <input type="number" id="c-value" required min="0" step="0.01" placeholder="10" />
+        </div>
+        <div class="field">
+          <label>Min Order (₹)</label>
+          <input type="number" id="c-minOrder" min="0" value="0" />
+        </div>
+        <div class="field">
+          <label>Max Uses (0 = unlimited)</label>
+          <input type="number" id="c-maxUses" min="0" value="0" />
+        </div>
+        <div class="field full">
+          <label>Expiry Date</label>
+          <input type="date" id="c-expires" />
+        </div>
+        <div class="field full checkbox-field">
+          <input type="checkbox" id="c-active" checked />
+          <label style="text-transform:none;letter-spacing:0;font-size:.9rem;color:var(--text-soft)">Active</label>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" id="couponCancel">Cancel</button>
+      <button class="btn-primary" id="couponSave">Save Coupon</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <script type="module">
@@ -501,9 +788,13 @@ const state = {
   products: [],
   orders: [],
   customers: [],
+  coupons: [],
+  reviews: [],
   stats: {},
   currentView: 'dashboard',
   editingProductId: null,
+  editingCouponId: null,
+  viewingOrderId: null,
   slugManuallyEdited: false,
 };
 
@@ -527,7 +818,28 @@ function fmtDate(ts) {
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 }
+function fmtDateFull(ts) {
+  if (!ts) return '—';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
 function fmtMoney(n) { return '₹' + Number(n || 0).toLocaleString('en-IN'); }
+function toMillis(ts) { return ts?.toMillis ? ts.toMillis() : (ts ? new Date(ts).getTime() : 0); }
+function stars(r) {
+  const n = Math.round(Number(r) || 0);
+  let out = '';
+  for (let i = 1; i <= 5; i++) out += i <= n ? '★' : '<span class="off">★</span>';
+  return `<span class="stars">${out}</span>`;
+}
+function csvEsc(v) { return `"${String(v == null ? '' : v).replace(/"/g,'""')}"`; }
+function downloadCSV(name, rows) {
+  const csv = rows.map(r => r.map(csvEsc).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.click();
+  URL.revokeObjectURL(url);
+}
 
 let toastTimer;
 function toast(msg, type = '') {
@@ -536,6 +848,12 @@ function toast(msg, type = '') {
   el.className = 'toast show ' + type;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* Chart registry (destroy before re-create) */
+const charts = {};
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
 }
 
 /* =========================================================
@@ -591,10 +909,11 @@ function switchView(view) {
   $$('.sidebar nav a').forEach(a => a.classList.toggle('active', a.dataset.view === view));
   const titles = {
     dashboard: 'Dashboard', products: 'Products', orders: 'Orders',
-    inventory: 'Inventory', customers: 'Customers', settings: 'Settings',
+    inventory: 'Inventory', customers: 'Customers', reports: 'Reports',
+    coupons: 'Coupons', reviews: 'Reviews', settings: 'Settings',
   };
   $('#pageTitle').textContent = titles[view] || 'Admin';
-  
+
   if (view === 'products') renderProducts();
   if (view === 'orders') renderOrders();
   if (view === 'inventory') {
@@ -605,6 +924,9 @@ function switchView(view) {
   }
   if (view === 'customers') renderCustomers();
   if (view === 'dashboard') renderDashboard();
+  if (view === 'reports') renderReports();
+  if (view === 'coupons') renderCoupons();
+  if (view === 'reviews') renderReviews();
 }
 
 /* =========================================================
@@ -613,29 +935,35 @@ function switchView(view) {
 function setupLiveListeners() {
   onSnapshot(collection(db, 'products'), (snap) => {
     state.products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    state.products.sort((a, b) => {
-      const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-      const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-      return tb - ta;
-    });
+    state.products.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
     computeStats();
     if (state.currentView === 'dashboard') renderDashboard();
     if (state.currentView === 'products') renderProducts();
     if (state.currentView === 'inventory') renderInventory();
+    if (state.currentView === 'reports') renderReports();
   }, (error) => { console.error("Products Listener Error:", error); });
 
   onSnapshot(collection(db, 'orders'), (snap) => {
     state.orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    state.orders.sort((a, b) => {
-      const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-      const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-      return tb - ta;
-    });
+    state.orders.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
     computeStats();
     if (state.currentView === 'dashboard') renderDashboard();
     if (state.currentView === 'orders') renderOrders();
     if (state.currentView === 'customers') renderCustomers();
+    if (state.currentView === 'reports') renderReports();
   }, (error) => { console.error("Orders Listener Error:", error); });
+
+  onSnapshot(collection(db, 'coupons'), (snap) => {
+    state.coupons = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    state.coupons.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+    if (state.currentView === 'coupons') renderCoupons();
+  }, (error) => { console.error("Coupons Listener Error:", error); });
+
+  onSnapshot(collection(db, 'reviews'), (snap) => {
+    state.reviews = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    state.reviews.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+    if (state.currentView === 'reviews') renderReviews();
+  }, (error) => { console.error("Reviews Listener Error:", error); });
 }
 
 function computeStats() {
@@ -654,7 +982,7 @@ function computeStats() {
     lowStock: products.filter(p => Number(p.stock || 0) < 5).length,
     customers: emails.size,
   };
-  
+
   const map = new Map();
   for (const o of orders) {
     const c = o.customer || {};
@@ -665,10 +993,41 @@ function computeStats() {
     const e = map.get(email);
     e.orders += 1;
     e.totalSpent += Number(o.total) || 0;
-    const ts = o.createdAt?.toMillis ? o.createdAt.toMillis() : 0;
+    const ts = toMillis(o.createdAt);
     if (ts > e.lastOrder) e.lastOrder = ts;
   }
   state.customers = Array.from(map.values()).sort((a, b) => b.lastOrder - a.lastOrder);
+
+  updateNotifBadge();
+}
+
+/* =========================================================
+   NOTIFICATION BELL
+   ========================================================= */
+function updateNotifBadge() {
+  const alerts = [];
+  const low = state.products.filter(p => Number(p.stock || 0) < 5);
+  if (low.length) alerts.push({ icon: '⚠️', title: `${low.length} product(s) low on stock`, sub: low.slice(0,3).map(p=>p.name).join(', '), view: 'inventory' });
+  const pending = state.orders.filter(o => o.status === 'pending');
+  if (pending.length) alerts.push({ icon: '🧾', title: `${pending.length} pending order(s)`, sub: 'Awaiting processing', view: 'orders' });
+  const out = state.products.filter(p => Number(p.stock || 0) === 0);
+  if (out.length) alerts.push({ icon: '🚫', title: `${out.length} product(s) out of stock`, sub: out.slice(0,3).map(p=>p.name).join(', '), view: 'inventory' });
+
+  const badge = $('#notifBadge');
+  if (alerts.length) { badge.textContent = alerts.length; badge.classList.remove('hidden'); }
+  else badge.classList.add('hidden');
+
+  const dd = $('#notifDropdown');
+  dd.innerHTML = alerts.length
+    ? '<h4>Alerts</h4>' + alerts.map(a => `<div class="notif-item" data-notif-view="${a.view}"><strong>${a.icon} ${esc(a.title)}</strong><span>${esc(a.sub)}</span></div>`).join('')
+    : '<div class="notif-empty">✓ All good. No alerts.</div>';
+
+  dd.querySelectorAll('[data-notif-view]').forEach(el => {
+    el.addEventListener('click', () => {
+      dd.classList.add('hidden');
+      switchView(el.dataset.notifView);
+    });
+  });
 }
 
 /* =========================================================
@@ -736,6 +1095,72 @@ function renderDashboard() {
   renderStats();
   renderRecentOrders();
   renderLowStock();
+  renderDashboardCharts();
+}
+
+function renderDashboardCharts() {
+  if (typeof Chart === 'undefined') return;
+
+  // 14-day revenue
+  const days = 14;
+  const labels = [], revData = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const label = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    labels.push(label);
+    const total = state.orders.reduce((s, o) => {
+      if (o.status === 'cancelled') return s;
+      const ts = toMillis(o.createdAt);
+      if (!ts) return s;
+      const k = new Date(ts).toISOString().slice(0, 10);
+      return k === key ? s + Number(o.total || 0) : s;
+    }, 0);
+    revData.push(total);
+  }
+  destroyChart('dashRevenueChart');
+  const ctx = document.getElementById('dashRevenueChart');
+  if (ctx) {
+    charts.dashRevenueChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Revenue (₹)', data: revData,
+          borderColor: '#7B2D4E', backgroundColor: 'rgba(123,45,78,.08)',
+          fill: true, tension: .35, pointRadius: 3, pointBackgroundColor: '#C9A96E',
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { callback: v => '₹' + v } } },
+      },
+    });
+  }
+
+  // status doughnut
+  const statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+  const counts = statuses.map(s => state.orders.filter(o => (o.status || 'pending') === s).length);
+  destroyChart('dashStatusChart');
+  const ctx2 = document.getElementById('dashStatusChart');
+  if (ctx2) {
+    charts.dashStatusChart = new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+        labels: statuses.map(s => s[0].toUpperCase() + s.slice(1)),
+        datasets: [{
+          data: counts,
+          backgroundColor: ['#D68910', '#2874A6', '#1E6FB8', '#1F8A4C', '#C0392B'],
+          borderWidth: 0,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
+      },
+    });
+  }
 }
 
 /* =========================================================
@@ -743,11 +1168,32 @@ function renderDashboard() {
    ========================================================= */
 function renderProducts() {
   const tbody = $('#productsBody');
-  if (!state.products.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty">No products yet. Click "+ Add Product" to get started.</td></tr>';
+  if (!tbody) return;
+
+  const search = ($('#prodSearch')?.value || '').toLowerCase().trim();
+  const cat = $('#prodCategoryFilter')?.value || 'all';
+  const sort = $('#prodSort')?.value || 'newest';
+
+  let list = state.products.filter(p => {
+    const matchSearch = !search
+      || (p.name || '').toLowerCase().includes(search)
+      || (p.slug || '').toLowerCase().includes(search)
+      || (p.variant || '').toLowerCase().includes(search);
+    const matchCat = cat === 'all' || p.category === cat;
+    return matchSearch && matchCat;
+  });
+
+  if (sort === 'price-asc') list.sort((a, b) => Number(a.price) - Number(b.price));
+  else if (sort === 'price-desc') list.sort((a, b) => Number(b.price) - Number(a.price));
+  else if (sort === 'name') list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  else if (sort === 'stock') list.sort((a, b) => Number(a.stock || 0) - Number(b.stock || 0));
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty">No products match your filters.</td></tr>`;
     return;
   }
-  tbody.innerHTML = state.products.map(p => `
+
+  tbody.innerHTML = list.map(p => `
     <tr>
       <td><img class="thumb" src="${esc(p.image || '')}" alt="" onerror="this.style.opacity=.2" /></td>
       <td>
@@ -778,6 +1224,15 @@ function renderProducts() {
     btn.addEventListener('click', () => deleteProduct(btn.dataset.delId));
   });
 }
+window.renderProducts = renderProducts;
+
+window.exportProducts = function () {
+  if (!state.products.length) return toast('No products to export', 'error');
+  const rows = [['Name', 'Variant', 'Category', 'Price', 'Old Price', 'Stock', 'Slug', 'Featured']];
+  state.products.forEach(p => rows.push([p.name, p.variant || '', p.category || '', p.price, p.oldPrice || 0, p.stock || 0, p.slug || '', p.featured ? 'Yes' : 'No']));
+  downloadCSV(`products-${new Date().toISOString().slice(0,10)}.csv`, rows);
+  toast('Products exported ✓', 'success');
+};
 
 function openProductModal(product) {
   state.editingProductId = product ? product.id : null;
@@ -908,12 +1363,34 @@ async function deleteProduct(id) {
    ========================================================= */
 function renderOrders() {
   const tbody = $('#ordersBody');
-  if (!state.orders.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty">No orders yet. Click "+ Create Test Order" to test.</td></tr>';
+  if (!tbody) return;
+
+  const search = ($('#orderSearch')?.value || '').toLowerCase().trim();
+  const status = $('#orderStatusFilter')?.value || 'all';
+  const from = $('#orderDateFrom')?.value ? new Date($('#orderDateFrom').value).getTime() : 0;
+  const to = $('#orderDateTo')?.value ? new Date($('#orderDateTo').value).getTime() + 86400000 : Infinity;
+
+  let list = state.orders.filter(o => {
+    const id = (o.orderId || o.id || '').toLowerCase();
+    const c = o.customer || {};
+    const matchSearch = !search
+      || id.includes(search)
+      || (c.name || '').toLowerCase().includes(search)
+      || (c.email || '').toLowerCase().includes(search)
+      || (c.phone || '').toLowerCase().includes(search);
+    const matchStatus = status === 'all' || (o.status || 'pending') === status;
+    const ts = toMillis(o.createdAt);
+    const matchDate = ts >= from && ts <= to;
+    return matchSearch && matchStatus && matchDate;
+  });
+
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">No orders match your filters.</td></tr>';
     return;
   }
+
   const statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-  tbody.innerHTML = state.orders.map(o => `
+  tbody.innerHTML = list.map(o => `
     <tr>
       <td><strong>${esc(o.orderId || o.id.slice(0, 10))}</strong></td>
       <td>
@@ -930,6 +1407,7 @@ function renderOrders() {
       <td>${fmtDate(o.createdAt)}</td>
       <td>
         <div class="actions">
+          <button class="icon-btn" data-view-order="${esc(o.id)}" title="View">👁</button>
           <button class="icon-btn danger" data-del-order="${esc(o.id)}" title="Delete">🗑</button>
         </div>
       </td>
@@ -942,7 +1420,26 @@ function renderOrders() {
   tbody.querySelectorAll('[data-del-order]').forEach(btn => {
     btn.addEventListener('click', () => deleteOrder(btn.dataset.delOrder));
   });
+  tbody.querySelectorAll('[data-view-order]').forEach(btn => {
+    btn.addEventListener('click', () => openOrderDetail(btn.dataset.viewOrder));
+  });
 }
+window.renderOrders = renderOrders;
+
+window.exportOrders = function () {
+  if (!state.orders.length) return toast('No orders to export', 'error');
+  const rows = [['Order ID','Customer','Email','Phone','Items','Subtotal','Shipping','Total','Status','Date']];
+  state.orders.forEach(o => {
+    const c = o.customer || {};
+    rows.push([
+      o.orderId || o.id, c.name || 'Guest', c.email || '', c.phone || '',
+      (o.items || []).length, o.subtotal || 0, o.shipping || 0, o.total || 0,
+      o.status || 'pending', fmtDateFull(o.createdAt),
+    ]);
+  });
+  downloadCSV(`orders-${new Date().toISOString().slice(0,10)}.csv`, rows);
+  toast('Orders exported ✓', 'success');
+};
 
 async function updateOrderStatus(id, status) {
   try {
@@ -978,24 +1475,126 @@ async function createTestOrder() {
   } catch (e) { toast(e.message, 'error'); }
 }
 
+/* ===== NEW: Order detail modal ===== */
+function openOrderDetail(id) {
+  const o = state.orders.find(x => x.id === id);
+  if (!o) return;
+  state.viewingOrderId = id;
+  const c = o.customer || {};
+  const items = o.items || [];
+
+  const statuses = ['pending', 'processing', 'shipped', 'delivered'];
+  const cancelled = (o.status === 'cancelled');
+  const currentIdx = statuses.indexOf(o.status);
+
+  $('#orderDetailTitle').textContent = `Order ${o.orderId || o.id.slice(0, 10)}`;
+
+  $('#orderDetailBody').innerHTML = `
+    <div class="detail-block" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <div>
+        <div class="label">Order ID</div>
+        <div class="val"><strong>${esc(o.orderId || o.id)}</strong></div>
+      </div>
+      <div>
+        <div class="label">Placed On</div>
+        <div class="val">${fmtDateFull(o.createdAt)}</div>
+      </div>
+      <div>
+        <div class="label">Status</div>
+        <div class="val"><span class="badge badge-${o.status || 'pending'}">${o.status || 'pending'}</span></div>
+      </div>
+    </div>
+
+    ${cancelled ? `
+      <div class="timeline">
+        <div class="timeline-step cancelled"><div class="timeline-dot">✕</div><span>Cancelled</span></div>
+      </div>
+    ` : `
+      <div class="timeline">
+        ${statuses.map((s, i) => `
+          <div class="timeline-step ${i < currentIdx ? 'done' : i === currentIdx ? 'active' : ''}">
+            <div class="timeline-dot">${i < currentIdx ? '✓' : i + 1}</div>
+            <span>${s[0].toUpperCase() + s.slice(1)}</span>
+          </div>
+        `).join('')}
+      </div>
+    `}
+
+    <div class="order-detail-grid">
+      <div class="detail-block">
+        <div class="label">Customer</div>
+        <div class="val">
+          <strong>${esc(c.name || 'Guest')}</strong><br>
+          ${esc(c.email || '—')}<br>
+          ${esc(c.phone || '—')}
+        </div>
+      </div>
+      <div class="detail-block">
+        <div class="label">Shipping Address</div>
+        <div class="val">${esc(c.address || '—')}</div>
+      </div>
+    </div>
+
+    <div class="detail-block" style="margin-bottom:16px">
+      <div class="label">Items (${items.length})</div>
+      <div class="table-wrap" style="margin-top:10px">
+        <table>
+          <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+          <tbody>
+            ${items.map(it => `
+              <tr>
+                <td>
+                  <div class="cell-name">${esc(it.name)}</div>
+                  <div class="cell-sub">${esc(it.variant || '')}</div>
+                </td>
+                <td>${Number(it.quantity) || 1}</td>
+                <td>${fmtMoney(it.price)}</td>
+                <td class="cell-price">${fmtMoney(Number(it.price) * (Number(it.quantity) || 1))}</td>
+              </tr>
+            `).join('') || '<tr><td colspan="4" class="empty">No items</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="detail-block">
+      <div class="label">Payment Summary</div>
+      <div class="val" style="display:flex;justify-content:space-between;margin-top:6px">
+        <span>Subtotal:</span><span>${fmtMoney(o.subtotal || 0)}</span>
+      </div>
+      <div class="val" style="display:flex;justify-content:space-between;margin-top:4px">
+        <span>Shipping:</span><span>${fmtMoney(o.shipping || 0)}</span>
+      </div>
+      <div class="val" style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid #e5ddd3">
+        <strong>Total:</strong><strong style="color:var(--primary);font-size:1.05rem">${fmtMoney(o.total || 0)}</strong>
+      </div>
+      <div class="val" style="margin-top:8px;font-size:.8rem;color:var(--text-muted)">
+        Payment Method: <strong style="text-transform:uppercase">${esc(o.paymentMethod || 'COD')}</strong>
+      </div>
+    </div>
+  `;
+  $('#orderDetailModal').classList.remove('hidden');
+}
+
 /* =========================================================
    INVENTORY MANAGEMENT
    ========================================================= */
 function renderInventory() {
   const tbody = $('#inventoryBody');
+  if (!tbody) return;
   if (!state.products.length) {
     tbody.innerHTML = '<tr><td colspan="6" class="empty">No products yet.</td></tr>';
     return;
   }
 
-  const search = $('#invSearch').value.toLowerCase();
-  const statusFilter = $('#invStatusFilter').value;
-  const catFilter = $('#invCategoryFilter').value;
+  const search = ($('#invSearch')?.value || '').toLowerCase();
+  const statusFilter = $('#invStatusFilter')?.value || 'all';
+  const catFilter = $('#invCategoryFilter')?.value || 'all';
 
   let filtered = state.products.filter(p => {
-    const matchSearch = p.name.toLowerCase().includes(search) || (p.variant && p.variant.toLowerCase().includes(search));
+    const matchSearch = (p.name || '').toLowerCase().includes(search) || (p.variant && p.variant.toLowerCase().includes(search));
     const matchCat = catFilter === 'all' || p.category === catFilter;
-    
+
     const stock = Number(p.stock) || 0;
     let matchStatus = true;
     if (statusFilter === 'in') matchStatus = stock >= 5;
@@ -1037,38 +1636,29 @@ function renderInventory() {
     `;
   }).join('');
 
-  // Attach Event Listeners instead of inline onclick
   tbody.querySelectorAll('.btn-adjust').forEach(btn => {
-    btn.addEventListener('click', () => {
-      adjustStock(btn.dataset.id, Number(btn.dataset.delta));
-    });
+    btn.addEventListener('click', () => adjustStock(btn.dataset.id, Number(btn.dataset.delta)));
   });
   tbody.querySelectorAll('.btn-update-stock').forEach(btn => {
-    btn.addEventListener('click', () => {
-      openStockModal(btn.dataset.id);
-    });
+    btn.addEventListener('click', () => openStockModal(btn.dataset.id));
   });
 }
+window.renderInventory = renderInventory;
 
 async function adjustStock(id, delta) {
   const p = state.products.find(x => x.id === id);
   if (!p) return;
   const newStock = Math.max(0, (Number(p.stock) || 0) + delta);
-  
   try {
     await updateDoc(doc(db, 'products', id), { stock: newStock, updatedAt: serverTimestamp() });
-  } catch (e) {
-    toast(e.message, 'error');
-  }
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 function openStockModal(id) {
   const p = state.products.find(x => x.id === id);
   if (!p) return;
-  
   const currentStock = Number(p.stock) || 0;
   const newStock = prompt(`Update stock for "${p.name}"\nCurrent stock: ${currentStock}\n\nEnter new stock quantity:`, currentStock);
-  
   if (newStock !== null && newStock !== "") {
     const num = Math.max(0, parseInt(newStock) || 0);
     if (num !== currentStock) setStock(id, num);
@@ -1081,47 +1671,40 @@ async function setStock(id, num) {
   try {
     await updateDoc(doc(db, 'products', id), { stock: num, updatedAt: serverTimestamp() });
     toast(`Stock for "${p.name}" updated to ${num}`, 'success');
-  } catch (e) {
-    toast(e.message, 'error');
-  }
+  } catch (e) { toast(e.message, 'error'); }
 }
 
-// Export Inventory to CSV
 window.exportInventory = function() {
   const products = state.products;
   if (!products.length) return toast('No data to export', 'error');
-
-  let csv = 'Product Name,Category,Price (₹),Stock,Status,Slug\n';
-  
+  const rows = [['Product Name','Category','Price (₹)','Stock','Status','Slug']];
   products.forEach(p => {
     const stock = Number(p.stock) || 0;
     const status = stock === 0 ? 'Out of Stock' : stock < 5 ? 'Low Stock' : 'In Stock';
-    csv += `"${p.name}","${p.category}",${p.price},${stock},"${status}","${p.slug}"\n`;
+    rows.push([p.name, p.category, p.price, stock, status, p.slug]);
   });
-
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.setAttribute('href', url);
-  a.setAttribute('download', `silk-soul-inventory-${new Date().toISOString().split('T')[0]}.csv`);
-  a.click();
-  window.URL.revokeObjectURL(url);
+  downloadCSV(`silk-soul-inventory-${new Date().toISOString().split('T')[0]}.csv`, rows);
+  toast('Inventory exported ✓', 'success');
 };
-
-// Export renderInventory to window so filters can call it
-window.renderInventory = renderInventory;
-
 
 /* =========================================================
    CUSTOMERS
    ========================================================= */
 function renderCustomers() {
   const tbody = $('#customersBody');
-  if (!state.customers.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty">No customers yet (orders create customers automatically).</td></tr>';
+  if (!tbody) return;
+  const search = ($('#custSearch')?.value || '').toLowerCase().trim();
+
+  let list = state.customers.filter(c => !search
+    || (c.name || '').toLowerCase().includes(search)
+    || (c.email || '').toLowerCase().includes(search)
+    || (c.phone || '').toLowerCase().includes(search));
+
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">No customers found.</td></tr>';
     return;
   }
-  tbody.innerHTML = state.customers.map(c => `
+  tbody.innerHTML = list.map(c => `
     <tr>
       <td class="cell-name">${esc(c.name)}</td>
       <td>${esc(c.email)}</td>
@@ -1131,6 +1714,326 @@ function renderCustomers() {
       <td>${c.lastOrder ? fmtDate(c.lastOrder) : '—'}</td>
     </tr>
   `).join('');
+}
+window.renderCustomers = renderCustomers;
+
+window.exportCustomers = function () {
+  if (!state.customers.length) return toast('No customers to export', 'error');
+  const rows = [['Name','Email','Phone','Orders','Total Spent','Last Order']];
+  state.customers.forEach(c => rows.push([c.name, c.email, c.phone, c.orders, c.totalSpent, c.lastOrder ? fmtDateFull(c.lastOrder) : '']));
+  downloadCSV(`customers-${new Date().toISOString().slice(0,10)}.csv`, rows);
+  toast('Customers exported ✓', 'success');
+};
+
+/* =========================================================
+   REPORTS (NEW)
+   ========================================================= */
+function renderReports() {
+  if (!$('#reportRange')) return;
+  const days = Number($('#reportRange').value) || 30;
+  const cutoff = Date.now() - days * 86400000;
+
+  const orders = state.orders.filter(o => toMillis(o.createdAt) >= cutoff);
+  const valid = orders.filter(o => o.status !== 'cancelled');
+  const revenue = valid.reduce((s, o) => s + Number(o.total || 0), 0);
+  const aov = valid.length ? revenue / valid.length : 0;
+  const customersSet = new Set(valid.map(o => o.customer?.email).filter(Boolean));
+  const units = valid.reduce((s, o) => s + (o.items || []).reduce((a, i) => a + (Number(i.quantity) || 1), 0), 0);
+
+  $('#reportStats').innerHTML = [
+    { label: 'Revenue', value: fmtMoney(revenue), sub: `${days} days` },
+    { label: 'Orders', value: valid.length, sub: `${orders.length - valid.length} cancelled` },
+    { label: 'Avg Order Value', value: fmtMoney(aov), sub: 'Per order' },
+    { label: 'Customers', value: customersSet.size, sub: 'Unique buyers' },
+    { label: 'Units Sold', value: units, sub: 'Total items' },
+  ].map(c => `
+    <div class="stat">
+      <div class="label">${c.label}</div>
+      <div class="value">${c.value}</div>
+      <div class="sub">${c.sub}</div>
+    </div>
+  `).join('');
+
+  if (typeof Chart === 'undefined') return;
+
+  // Revenue trend
+  const buckets = {};
+  const labels = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    buckets[key] = 0;
+    labels.push(d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }));
+  }
+  valid.forEach(o => {
+    const ts = toMillis(o.createdAt);
+    if (!ts) return;
+    const key = new Date(ts).toISOString().slice(0, 10);
+    if (key in buckets) buckets[key] += Number(o.total || 0);
+  });
+  const revData = Object.values(buckets);
+
+  destroyChart('reportRevenueChart');
+  const rCtx = document.getElementById('reportRevenueChart');
+  if (rCtx) {
+    charts.reportRevenueChart = new Chart(rCtx, {
+      type: 'line',
+      data: { labels, datasets: [{ label: 'Revenue (₹)', data: revData, borderColor: '#7B2D4E', backgroundColor: 'rgba(123,45,78,.08)', fill: true, tension: .35, pointRadius: 2 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { callback: v => '₹' + v } } } },
+    });
+  }
+
+  // Status doughnut
+  const statuses = ['pending','processing','shipped','delivered','cancelled'];
+  const statusCounts = statuses.map(s => orders.filter(o => (o.status || 'pending') === s).length);
+  destroyChart('reportStatusChart');
+  const sCtx = document.getElementById('reportStatusChart');
+  if (sCtx) {
+    charts.reportStatusChart = new Chart(sCtx, {
+      type: 'doughnut',
+      data: { labels: statuses.map(s => s[0].toUpperCase() + s.slice(1)), datasets: [{ data: statusCounts, backgroundColor: ['#D68910','#2874A6','#1E6FB8','#1F8A4C','#C0392B'], borderWidth: 0 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } } },
+    });
+  }
+
+  // Top products & category
+  const productSales = {};
+  const catSales = {};
+  valid.forEach(o => {
+    (o.items || []).forEach(it => {
+      const key = it.id || it.name;
+      if (!productSales[key]) productSales[key] = { name: it.name, qty: 0, revenue: 0 };
+      productSales[key].qty += Number(it.quantity) || 1;
+      productSales[key].revenue += (Number(it.price) || 0) * (Number(it.quantity) || 1);
+      const prod = state.products.find(p => p.id === it.id);
+      const cat = prod?.category || 'other';
+      catSales[cat] = (catSales[cat] || 0) + (Number(it.price) || 0) * (Number(it.quantity) || 1);
+    });
+  });
+  const topList = Object.values(productSales).sort((a, b) => b.revenue - a.revenue).slice(0, 8);
+
+  destroyChart('reportTopProductsChart');
+  const tCtx = document.getElementById('reportTopProductsChart');
+  if (tCtx) {
+    charts.reportTopProductsChart = new Chart(tCtx, {
+      type: 'bar',
+      data: { labels: topList.map(p => p.name.length > 20 ? p.name.slice(0, 20) + '…' : p.name), datasets: [{ label: 'Revenue (₹)', data: topList.map(p => p.revenue), backgroundColor: '#7B2D4E', borderRadius: 6 }] },
+      options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { callback: v => '₹' + v } } } },
+    });
+  }
+
+  destroyChart('reportCategoryChart');
+  const cCtx = document.getElementById('reportCategoryChart');
+  if (cCtx) {
+    const cats = Object.keys(catSales);
+    charts.reportCategoryChart = new Chart(cCtx, {
+      type: 'bar',
+      data: { labels: cats.map(c => c[0].toUpperCase() + c.slice(1)), datasets: [{ label: 'Sales (₹)', data: cats.map(c => catSales[c]), backgroundColor: '#C9A96E', borderRadius: 6 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { callback: v => '₹' + v } } } },
+    });
+  }
+
+  // Top products table
+  const tbody = $('#topProductsBody');
+  if (!topList.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">No sales in this period.</td></tr>';
+  } else {
+    tbody.innerHTML = topList.map((p, i) => `
+      <tr>
+        <td><strong>${i + 1}</strong></td>
+        <td class="cell-name">${esc(p.name)}</td>
+        <td>${p.qty}</td>
+        <td class="cell-price">${fmtMoney(p.revenue)}</td>
+      </tr>
+    `).join('');
+  }
+}
+window.renderReports = renderReports;
+
+window.exportReport = function () {
+  const days = Number($('#reportRange')?.value) || 30;
+  const cutoff = Date.now() - days * 86400000;
+  const orders = state.orders.filter(o => toMillis(o.createdAt) >= cutoff && o.status !== 'cancelled');
+  const rows = [['Order ID','Date','Customer','Email','Items','Total','Status']];
+  orders.forEach(o => {
+    rows.push([o.orderId || o.id, fmtDateFull(o.createdAt), o.customer?.name || 'Guest', o.customer?.email || '', (o.items || []).length, o.total || 0, o.status || 'pending']);
+  });
+  downloadCSV(`report-${days}d-${new Date().toISOString().slice(0,10)}.csv`, rows);
+  toast('Report exported ✓', 'success');
+};
+
+/* =========================================================
+   COUPONS (NEW)
+   ========================================================= */
+function renderCoupons() {
+  const tbody = $('#couponsBody');
+  if (!tbody) return;
+  if (!state.coupons.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">No coupons yet. Click "+ Create Coupon".</td></tr>';
+    return;
+  }
+  const now = Date.now();
+  tbody.innerHTML = state.coupons.map(c => {
+    const expMs = c.expiresAt?.toMillis ? c.expiresAt.toMillis() : (c.expiresAt ? new Date(c.expiresAt).getTime() : 0);
+    const expired = expMs && expMs < now;
+    const active = c.active !== false && !expired;
+    const valueStr = c.type === 'percent' ? `${c.value}%` : fmtMoney(c.value);
+    const usage = c.maxUses ? `${c.usedCount || 0} / ${c.maxUses}` : `${c.usedCount || 0} / ∞`;
+    return `
+      <tr>
+        <td><strong style="letter-spacing:1px">${esc(c.code)}</strong></td>
+        <td>${c.type === 'percent' ? 'Percentage' : 'Fixed'}</td>
+        <td class="cell-price">${valueStr}</td>
+        <td>${c.minOrder ? fmtMoney(c.minOrder) : '—'}</td>
+        <td>${usage}</td>
+        <td>${expMs ? fmtDate(expMs) : 'Never'}</td>
+        <td><span class="badge badge-${active ? 'active' : 'inactive'}">${active ? 'Active' : (expired ? 'Expired' : 'Inactive')}</span></td>
+        <td>
+          <div class="actions">
+            <button class="icon-btn" data-edit-coupon="${esc(c.id)}" title="Edit">✎</button>
+            <button class="icon-btn danger" data-del-coupon="${esc(c.id)}" title="Delete">🗑</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  tbody.querySelectorAll('[data-edit-coupon]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const c = state.coupons.find(x => x.id === btn.dataset.editCoupon);
+      if (c) openCouponModal(c);
+    });
+  });
+  tbody.querySelectorAll('[data-del-coupon]').forEach(btn => {
+    btn.addEventListener('click', () => deleteCoupon(btn.dataset.delCoupon));
+  });
+}
+window.renderCoupons = renderCoupons;
+
+function openCouponModal(c) {
+  state.editingCouponId = c ? c.id : null;
+  $('#couponModalTitle').textContent = c ? 'Edit Coupon' : 'Create Coupon';
+  $('#c-id').value = c ? c.id : '';
+  $('#c-code').value = c ? (c.code || '') : '';
+  $('#c-type').value = c ? (c.type || 'percent') : 'percent';
+  $('#c-value').value = c ? (c.value || '') : '';
+  $('#c-minOrder').value = c ? (c.minOrder || 0) : 0;
+  $('#c-maxUses').value = c ? (c.maxUses || 0) : 0;
+  const exp = c?.expiresAt?.toDate ? c.expiresAt.toDate() : (c?.expiresAt ? new Date(c.expiresAt) : null);
+  $('#c-expires').value = exp ? exp.toISOString().slice(0, 10) : '';
+  $('#c-active').checked = c ? c.active !== false : true;
+  $('#couponModal').classList.remove('hidden');
+}
+
+function closeCouponModal() {
+  $('#couponModal').classList.add('hidden');
+  state.editingCouponId = null;
+}
+
+async function saveCoupon() {
+  const id = state.editingCouponId;
+  const btn = $('#couponSave');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const code = $('#c-code').value.trim().toUpperCase();
+    if (!code) throw new Error('Coupon code required');
+    const value = Number($('#c-value').value);
+    if (!value || value <= 0) throw new Error('Valid value required');
+
+    const payload = {
+      code,
+      type: $('#c-type').value,
+      value,
+      minOrder: Number($('#c-minOrder').value) || 0,
+      maxUses: Number($('#c-maxUses').value) || 0,
+      usedCount: id ? (state.coupons.find(c => c.id === id)?.usedCount || 0) : 0,
+      expiresAt: $('#c-expires').value ? new Date($('#c-expires').value) : null,
+      active: $('#c-active').checked,
+      updatedAt: serverTimestamp(),
+    };
+
+    if (id) {
+      await updateDoc(doc(db, 'coupons', id), payload);
+      toast('Coupon updated ✓', 'success');
+    } else {
+      payload.createdAt = serverTimestamp();
+      await addDoc(collection(db, 'coupons'), payload);
+      toast('Coupon created ✓', 'success');
+    }
+    closeCouponModal();
+  } catch (e) {
+    toast(e.message || 'Save failed', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save Coupon';
+  }
+}
+
+async function deleteCoupon(id) {
+  if (!confirm('Delete this coupon?')) return;
+  try {
+    await deleteDoc(doc(db, 'coupons', id));
+    toast('Coupon deleted', 'success');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+/* =========================================================
+   REVIEWS (NEW)
+   ========================================================= */
+function renderReviews() {
+  const tbody = $('#reviewsBody');
+  if (!tbody) return;
+  const filter = $('#reviewStatusFilter')?.value || 'all';
+
+  let list = state.reviews.filter(r => filter === 'all' || (r.status || 'pending') === filter);
+
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">No reviews yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(r => `
+    <tr>
+      <td>
+        <div class="cell-name">${esc(r.productName || '—')}</div>
+      </td>
+      <td>
+        <div class="cell-name">${esc(r.customerName || 'Guest')}</div>
+        <div class="cell-sub">${esc(r.customerEmail || '')}</div>
+      </td>
+      <td>${stars(r.rating)}</td>
+      <td style="max-width:300px">
+        <div class="cell-name">${esc(r.title || '')}</div>
+        <div class="cell-sub">${esc((r.body || '').slice(0, 100))}${(r.body || '').length > 100 ? '…' : ''}</div>
+      </td>
+      <td><span class="badge badge-${r.status || 'pending'}">${r.status || 'pending'}</span></td>
+      <td>${fmtDate(r.createdAt)}</td>
+      <td>
+        <div class="actions">
+          ${r.status !== 'approved' ? `<button class="icon-btn" data-approve="${esc(r.id)}" title="Approve">✓</button>` : ''}
+          ${r.status !== 'rejected' ? `<button class="icon-btn" data-reject="${esc(r.id)}" title="Reject">✕</button>` : ''}
+          <button class="icon-btn danger" data-del-review="${esc(r.id)}" title="Delete">🗑</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('[data-approve]').forEach(b => b.addEventListener('click', () => updateReviewStatus(b.dataset.approve, 'approved')));
+  tbody.querySelectorAll('[data-reject]').forEach(b => b.addEventListener('click', () => updateReviewStatus(b.dataset.reject, 'rejected')));
+  tbody.querySelectorAll('[data-del-review]').forEach(b => b.addEventListener('click', () => deleteReview(b.dataset.delReview)));
+}
+window.renderReviews = renderReviews;
+
+async function updateReviewStatus(id, status) {
+  try {
+    await updateDoc(doc(db, 'reviews', id), { status, updatedAt: serverTimestamp() });
+    toast(`Review ${status} ✓`, 'success');
+  } catch (e) { toast(e.message, 'error'); }
+}
+async function deleteReview(id) {
+  if (!confirm('Delete this review?')) return;
+  try {
+    await deleteDoc(doc(db, 'reviews', id));
+    toast('Review deleted', 'success');
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 /* =========================================================
@@ -1150,6 +2053,16 @@ function bindEvents() {
     a.addEventListener('click', (e) => { e.preventDefault(); switchView(a.dataset.viewLink); });
   });
 
+  // Notifications
+  $('#notifBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    $('#notifDropdown').classList.toggle('hidden');
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.notif-wrapper')) $('#notifDropdown').classList.add('hidden');
+  });
+
+  // Product modal
   $('#addProductBtn').addEventListener('click', () => openProductModal(null));
   $('#modalCloseBtn').addEventListener('click', closeProductModal);
   $('#modalCancelBtn').addEventListener('click', closeProductModal);
@@ -1176,10 +2089,26 @@ function bindEvents() {
   });
 
   $('#testOrderBtn').addEventListener('click', createTestOrder);
+
+  // Order detail modal
+  $('#orderDetailClose').addEventListener('click', () => $('#orderDetailModal').classList.add('hidden'));
+  $('#orderDetailDone').addEventListener('click', () => $('#orderDetailModal').classList.add('hidden'));
+  $('#orderDetailModal').addEventListener('click', (e) => {
+    if (e.target.id === 'orderDetailModal') $('#orderDetailModal').classList.add('hidden');
+  });
+
+  // Coupon modal
+  $('#addCouponBtn').addEventListener('click', () => openCouponModal(null));
+  $('#couponModalClose').addEventListener('click', closeCouponModal);
+  $('#couponCancel').addEventListener('click', closeCouponModal);
+  $('#couponSave').addEventListener('click', saveCoupon);
+  $('#couponModal').addEventListener('click', (e) => {
+    if (e.target.id === 'couponModal') closeCouponModal();
+  });
 }
 
 bindEvents();
-console.log('✦ Silk & Soul Admin ready (Real-time enabled)');
+console.log('✦ Silk & Soul Admin ready (v2 — Reports, Coupons, Reviews, Order Details)');
 </script>
 </body>
 </html>
