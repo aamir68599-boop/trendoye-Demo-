@@ -99,6 +99,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
 .badge-shipped{background:#E8F4FE;color:#1E6FB8}
 .badge-delivered{background:#E8F6EC;color:var(--green)}
 .badge-cancelled{background:#FBEAEA;color:var(--red)}
+.badge-refunded{background:#F3E5F5;color:#7B1FA2}
 .badge-stock-in{background:#E8F6EC;color:var(--green)}
 .badge-stock-low{background:#FEF3E2;color:var(--amber)}
 .badge-stock-out{background:#FBEAEA;color:var(--red)}
@@ -106,6 +107,9 @@ table tr:hover{background:rgba(201,169,110,.04)}
 .badge-rejected{background:#FBEAEA;color:var(--red)}
 .badge-active{background:#E8F6EC;color:var(--green)}
 .badge-inactive{background:#EFEAE4;color:var(--text-muted)}
+.badge-vip{background:linear-gradient(135deg,#FFD700,#FFA500);color:#7B2D4E;font-weight:700}
+.badge-repeat{background:#E8F1FA;color:var(--blue)}
+.badge-new{background:#F0F0F0;color:var(--text-muted)}
 .actions{display:flex;gap:6px;flex-wrap:wrap}
 .icon-btn{width:32px;height:32px;border-radius:8px;border:1px solid #e5ddd3;background:var(--warm-white);display:inline-flex;align-items:center;justify-content:center;font-size:.95rem;transition:.2s;color:var(--text-soft);text-decoration:none}
 .icon-btn:hover{background:var(--cream);border-color:var(--gold);color:var(--primary)}
@@ -113,6 +117,10 @@ table tr:hover{background:rgba(201,169,110,.04)}
 .btn-primary{background:var(--primary);color:#fff;padding:10px 20px;border:none;border-radius:10px;font-weight:600;font-size:.88rem;transition:.2s}
 .btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
 .btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-success{background:var(--green);color:#fff;padding:10px 20px;border:none;border-radius:10px;font-weight:600;font-size:.88rem;transition:.2s}
+.btn-success:hover{background:#176f3d}
+.btn-danger{background:var(--red);color:#fff;padding:10px 20px;border:none;border-radius:10px;font-weight:600;font-size:.88rem;transition:.2s}
+.btn-danger:hover{background:#a03224}
 .empty{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:.9rem}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .form-grid .full{grid-column:1/-1}
@@ -121,6 +129,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
 .field label{font-size:.78rem;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:.6px}
 .field input,.field textarea,.field select{padding:10px 12px;border:2px solid #e5ddd3;border-radius:8px;font-size:.9rem;font-family:inherit;transition:.2s;background:var(--warm-white)}
 .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--primary)}
+.field input[readonly]{background:#f5f0ea;color:var(--text-muted);cursor:not-allowed}
 .field textarea{resize:vertical;min-height:80px}
 .field .hint{font-size:.72rem;color:var(--text-muted);margin-top:2px}
 .checkbox-field{flex-direction:row;align-items:center;gap:10px}
@@ -165,7 +174,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
 .chart-wrap-sm{position:relative;height:200px}
 .order-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
 @media(max-width:640px){.order-detail-grid{grid-template-columns:1fr}}
-.detail-block{background:var(--cream);border-radius:10px;padding:14px 16px;border:1px solid rgba(45,27,26,.04)}
+.detail-block{background:var(--cream);border-radius:10px;padding:14px 16px;border:1px solid rgba(45,27,26,.04);margin-bottom:14px}
 .detail-block .label{font-size:.7rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);font-weight:600;margin-bottom:8px}
 .detail-block .val{font-size:.88rem;color:var(--text-soft);line-height:1.6}
 .detail-block .val strong{color:var(--text-dark)}
@@ -180,6 +189,13 @@ table tr:hover{background:rgba(201,169,110,.04)}
 .timeline-step.done span,.timeline-step.active span{color:var(--text-dark);font-weight:600}
 .stars{color:#E8B44A;font-size:.95rem;letter-spacing:1px}
 .stars .off{color:#DDD5C8}
+.section-divider{height:1px;background:rgba(45,27,26,.08);margin:18px 0}
+.detail-edit-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.detail-edit-row .field{flex:1;min-width:140px}
+.refund-box{background:#FBEAEA;border:1px solid #f5c6c6;border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.refund-box.applied{background:#F3E5F5;border-color:#CE93D8}
+.tracking-box{background:#E8F1FA;border:1px solid #b8d4ec;border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.notes-box{background:#FEF3E2;border:1px solid #f5dca8;border-radius:10px;padding:14px 16px;margin-bottom:14px}
 @media print {
   body *{visibility:hidden}
   #orderDetailModal, #orderDetailModal *{visibility:visible}
@@ -187,6 +203,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
   #orderDetailModal .modal{box-shadow:none;max-width:100%}
   #orderDetailModal .modal-footer, #orderDetailModal .modal-close{display:none !important}
   #orderDetailModal .modal-body{max-height:none;overflow:visible}
+  .no-print{display:none !important}
 }
 </style>
 </head>
@@ -263,13 +280,18 @@ table tr:hover{background:rgba(201,169,110,.04)}
           <div class="card-header" style="flex-direction:column;align-items:stretch;gap:14px">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
               <h3>All Products</h3>
-              <div style="display:flex;gap:8px">
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
                 <button class="btn-ghost" onclick="window.exportProducts()">📥 Export CSV</button>
+                <button class="btn-ghost" onclick="document.getElementById('csvImportFile').click()">📤 Import CSV</button>
+                <input type="file" id="csvImportFile" accept=".csv" style="display:none" onchange="window.importProductsCSV(this)" />
                 <button class="btn-primary" id="addProductBtn">+ Add Product</button>
               </div>
             </div>
             <div class="filter-bar">
               <input type="text" id="prodSearch" placeholder="🔍 Search products…" style="flex:1;min-width:200px" oninput="renderProducts()" />
+              <select id="prodBrandFilter" onchange="renderProducts()">
+                <option value="all">All Brands</option>
+              </select>
               <select id="prodCategoryFilter" onchange="renderProducts()">
                 <option value="all">All Categories</option>
                 <option value="cotton">Cotton Comfort</option>
@@ -287,7 +309,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
               </select>
             </div>
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Image</th><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Slug</th><th>Actions</th></tr></thead><tbody id="productsBody"></tbody></table></div>
+          <div class="table-wrap"><table><thead><tr><th>Image</th><th>Product</th><th>Brand</th><th>Category</th><th>Price</th><th>Stock</th><th>Slug</th><th>Actions</th></tr></thead><tbody id="productsBody"></tbody></table></div>
         </div>
       </section>
 
@@ -310,6 +332,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
                 <option value="shipped">Shipped</option>
                 <option value="delivered">Delivered</option>
                 <option value="cancelled">Cancelled</option>
+                <option value="refunded">Refunded</option>
               </select>
               <input type="date" id="orderDateFrom" onchange="renderOrders()" title="From date" />
               <input type="date" id="orderDateTo" onchange="renderOrders()" title="To date" />
@@ -359,7 +382,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
               <input type="text" id="custSearch" placeholder="🔍 Search name / email / phone…" style="flex:1;min-width:200px" oninput="renderCustomers()" />
             </div>
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Orders</th><th>Total Spent</th><th>Last Order</th></tr></thead><tbody id="customersBody"></tbody></table></div>
+          <div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Segment</th><th>Orders</th><th>Total Spent</th><th>Last Order</th><th>Actions</th></tr></thead><tbody id="customersBody"></tbody></table></div>
         </div>
       </section>
 
@@ -386,7 +409,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
         </div>
         <div class="card">
           <div class="card-header"><h3>🏆 Top Selling Products</h3></div>
-          <div class="table-wrap"><table><thead><tr><th>#</th><th>Product</th><th>Units Sold</th><th>Revenue</th></tr></thead><tbody id="topProductsBody"></tbody></table></div>
+          <div class="table-wrap"><table><thead><tr><th>#</th><th>Product</th><th>Units Sold</th><th>Revenue</th><th>Est. Cost</th><th>Est. Profit</th></tr></thead><tbody id="topProductsBody"></tbody></table></div>
         </div>
       </section>
 
@@ -425,9 +448,35 @@ table tr:hover{background:rgba(201,169,110,.04)}
 
       <section id="view-settings" class="view hidden">
         <div class="card" style="margin-bottom:20px">
-          <div class="card-header"><h3>Store Info</h3></div>
+          <div class="card-header">
+            <h3>Store Information</h3>
+            <button class="btn-primary" id="saveSettingsBtn">💾 Save Settings</button>
+          </div>
           <div class="card-body">
-            <div class="field" style="margin-bottom:16px"><label>Store Name</label><input type="text" value="Silk &amp; Soul" readonly /></div>
+            <div class="form-grid">
+              <div class="field"><label>Store Name</label><input type="text" id="set-storeName" placeholder="Silk & Soul" /></div>
+              <div class="field"><label>Store Email</label><input type="email" id="set-storeEmail" placeholder="hello@silksoul.com" /></div>
+              <div class="field"><label>Store Phone</label><input type="text" id="set-storePhone" placeholder="+91 98765 43210" /></div>
+              <div class="field"><label>Currency Symbol</label><input type="text" id="set-currency" placeholder="₹" /></div>
+              <div class="field full"><label>Store Address</label><textarea id="set-storeAddress" placeholder="Full store address..."></textarea></div>
+              <div class="field"><label>Tax Rate (%)</label><input type="number" id="set-taxRate" step="0.01" placeholder="5" /></div>
+              <div class="field"><label>Shipping Rate (₹)</label><input type="number" id="set-shippingRate" placeholder="79" /></div>
+              <div class="field full"><label>Free Shipping Above (₹)</label><input type="number" id="set-freeShippingThreshold" placeholder="999" /></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header"><h3>Payment & Shipping</h3></div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="field full"><label>Payment Gateway(s)</label><input type="text" id="set-paymentGateway" placeholder="Razorpay, COD, Stripe..." /></div>
+              <div class="field full"><label>Shipping Partner(s)</label><input type="text" id="set-shippingPartners" placeholder="Delhivery, BlueDart, India Post..." /></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header"><h3>System Info (Read Only)</h3></div>
+          <div class="card-body">
             <div class="field" style="margin-bottom:16px"><label>Firebase Project</label><input type="text" value="silk-and-soul" readonly /></div>
             <div class="field" style="margin-bottom:16px"><label>Logged In As</label><input type="text" id="settingsEmail" readonly /></div>
           </div>
@@ -443,7 +492,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
 </div>
 
 <div id="productModal" class="modal-overlay hidden">
-  <div class="modal">
+  <div class="modal" style="max-width:840px">
     <div class="modal-header"><h2 id="modalTitle">Add Product</h2><button class="modal-close" id="modalCloseBtn">✕</button></div>
     <div class="modal-body">
       <form id="productForm" class="form-grid">
@@ -451,6 +500,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
         <div class="field full"><label>Product Name *</label><input type="text" id="f-name" required placeholder="Mysore Silk Crepe" /></div>
         <div class="field full"><label>Slug (URL)</label><input type="text" id="f-slug" placeholder="mysore-silk-crepe" /><div class="hint">Preview: <code id="slugPreview">/products/...</code></div></div>
         <div class="field"><label>Variant</label><input type="text" id="f-variant" placeholder="Pure Silk · Burgundy Wine" /></div>
+        <div class="field"><label>Brand</label><input type="text" id="f-brand" placeholder="Silk & Soul / FabIndia / etc." /></div>
         <div class="field"><label>Category</label>
           <select id="f-category">
             <option value="cotton">Cotton Comfort</option><option value="silk">Silk Luxe</option>
@@ -458,15 +508,19 @@ table tr:hover{background:rgba(201,169,110,.04)}
             <option value="general" selected>General</option>
           </select>
         </div>
+        <div class="field"><label>Tag (optional)</label><input type="text" id="f-tag" placeholder="Bestseller / New / Top Rated" /></div>
         <div class="field"><label>Price (₹) *</label><input type="number" id="f-price" min="0" required placeholder="16365" /></div>
         <div class="field"><label>Old Price (₹)</label><input type="number" id="f-oldPrice" min="0" placeholder="18999" /></div>
+        <div class="field"><label>Cost Price (₹)</label><input type="number" id="f-costPrice" min="0" placeholder="8000" /><div class="hint">Purchase cost — profit calculate karne ke liye</div></div>
         <div class="field"><label>Stock</label><input type="number" id="f-stock" min="0" value="10" /></div>
-        <div class="field"><label>Tag (optional)</label><input type="text" id="f-tag" placeholder="Bestseller / New / Top Rated" /></div>
         <div class="field"><label>Rating (0–5)</label><input type="number" id="f-rating" min="0" max="5" step="0.1" value="5" /></div>
         <div class="field"><label>Reviews Count</label><input type="number" id="f-reviews" min="0" value="0" /></div>
-        <div class="field full"><label>Image URL</label><input type="text" id="f-image" placeholder="https://..." /></div>
-        <div class="field full"><label>Or Upload Image (Firebase Storage)</label><input type="file" id="f-file" accept="image/*" /><div class="upload-status" id="uploadStatus"></div><div id="imgPreviewWrap"></div></div>
+        <div class="field full"><label>Main Image URL</label><input type="text" id="f-image" placeholder="https://..." /></div>
+        <div class="field full"><label>Gallery Images (comma separated URLs)</label><input type="text" id="f-gallery" placeholder="https://img1.jpg, https://img2.jpg" /></div>
+        <div class="field full"><label>Upload Main Image (Firebase Storage)</label><input type="file" id="f-file" accept="image/*" /><div class="upload-status" id="uploadStatus"></div><div id="imgPreviewWrap"></div></div>
         <div class="field full"><label>Description</label><textarea id="f-description" placeholder="Handcrafted silk saree..."></textarea></div>
+        <div class="field full"><label>SEO — Meta Title</label><input type="text" id="f-metaTitle" placeholder="Buy Mysore Silk Crepe Saree Online" /></div>
+        <div class="field full"><label>SEO — Meta Description</label><textarea id="f-metaDescription" placeholder="Shop the finest handcrafted silk sarees..." style="min-height:60px"></textarea></div>
         <div class="field full checkbox-field"><input type="checkbox" id="f-featured" checked /><label style="text-transform:none;letter-spacing:0;font-size:.9rem;color:var(--text-soft)">Show on Home Page (Featured)</label></div>
       </form>
     </div>
@@ -475,10 +529,18 @@ table tr:hover{background:rgba(201,169,110,.04)}
 </div>
 
 <div id="orderDetailModal" class="modal-overlay hidden">
-  <div class="modal" style="max-width:820px">
+  <div class="modal" style="max-width:900px">
     <div class="modal-header"><h2 id="orderDetailTitle">Order Details</h2><button class="modal-close" id="orderDetailClose">✕</button></div>
     <div class="modal-body" id="orderDetailBody"></div>
-    <div class="modal-footer"><button class="btn-secondary" onclick="window.print()">🖨 Print Invoice</button><button class="btn-primary" id="orderDetailDone">Done</button></div>
+    <div class="modal-footer no-print"><button class="btn-secondary" onclick="window.print()">🖨 Print Invoice</button><button class="btn-primary" id="orderDetailDone">Done</button></div>
+  </div>
+</div>
+
+<div id="customerDetailModal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:820px">
+    <div class="modal-header"><h2 id="customerDetailTitle">Customer Details</h2><button class="modal-close" id="customerDetailClose">✕</button></div>
+    <div class="modal-body" id="customerDetailBody"></div>
+    <div class="modal-footer"><button class="btn-primary" id="customerDetailDone">Done</button></div>
   </div>
 </div>
 
@@ -518,7 +580,7 @@ table tr:hover{background:rgba(201,169,110,.04)}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc,
-  doc, query, where, limit, serverTimestamp, onSnapshot
+  doc, getDoc, setDoc, query, where, limit, serverTimestamp, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
@@ -539,8 +601,9 @@ const storage = getStorage(app);
 
 const state = {
   user: null, products: [], orders: [], customers: [], coupons: [], reviews: [],
-  stats: {}, currentView: 'dashboard', editingProductId: null, editingCouponId: null,
-  viewingOrderId: null, slugManuallyEdited: false,
+  stats: {}, settings: {},
+  currentView: 'dashboard', editingProductId: null, editingCouponId: null,
+  viewingOrderId: null, viewingCustomerEmail: null, slugManuallyEdited: false,
 };
 
 const $ = (s) => document.querySelector(s);
@@ -563,7 +626,10 @@ function fmtDateFull(ts) {
   const d = ts?.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
-function fmtMoney(n) { return '₹' + Number(n || 0).toLocaleString('en-IN'); }
+function fmtMoney(n) {
+  const cur = state.settings.currency || '₹';
+  return cur + Number(n || 0).toLocaleString('en-IN');
+}
 function stars(r) {
   const n = Math.round(Number(r) || 0);
   let out = '';
@@ -595,6 +661,7 @@ onAuthStateChanged(auth, (user) => {
     $('#app').classList.remove('hidden');
     $('#userEmail').textContent = user.email || '';
     $('#settingsEmail').value = user.email || '';
+    loadSettings();
     setupLiveListeners();
   } else {
     state.user = null;
@@ -621,6 +688,58 @@ async function handleLogout() {
   await signOut(auth);
   $('#emailInput').value = ''; $('#passwordInput').value = '';
 }
+
+/* ================= SETTINGS ================= */
+async function loadSettings() {
+  try {
+    const ref = doc(db, 'settings', 'store');
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      state.settings = snap.data();
+      applySettingsToUI();
+    } else {
+      state.settings = { currency: '₹', taxRate: 5, shippingRate: 79, freeShippingThreshold: 999, storeName: 'Silk & Soul' };
+      applySettingsToUI();
+    }
+  } catch (e) { console.error('Settings load failed:', e); }
+}
+function applySettingsToUI() {
+  const s = state.settings;
+  $('#set-storeName').value = s.storeName || 'Silk & Soul';
+  $('#set-storeEmail').value = s.storeEmail || '';
+  $('#set-storePhone').value = s.storePhone || '';
+  $('#set-currency').value = s.currency || '₹';
+  $('#set-storeAddress').value = s.storeAddress || '';
+  $('#set-taxRate').value = s.taxRate ?? 5;
+  $('#set-shippingRate').value = s.shippingRate ?? 79;
+  $('#set-freeShippingThreshold').value = s.freeShippingThreshold ?? 999;
+  $('#set-paymentGateway').value = s.paymentGateway || '';
+  $('#set-shippingPartners').value = s.shippingPartners || '';
+}
+async function saveSettings() {
+  const btn = $('#saveSettingsBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const payload = {
+      storeName: $('#set-storeName').value.trim(),
+      storeEmail: $('#set-storeEmail').value.trim(),
+      storePhone: $('#set-storePhone').value.trim(),
+      currency: $('#set-currency').value.trim() || '₹',
+      storeAddress: $('#set-storeAddress').value.trim(),
+      taxRate: Number($('#set-taxRate').value) || 0,
+      shippingRate: Number($('#set-shippingRate').value) || 0,
+      freeShippingThreshold: Number($('#set-freeShippingThreshold').value) || 0,
+      paymentGateway: $('#set-paymentGateway').value.trim(),
+      shippingPartners: $('#set-shippingPartners').value.trim(),
+      updatedAt: serverTimestamp(),
+    };
+    await setDoc(doc(db, 'settings', 'store'), payload, { merge: true });
+    state.settings = { ...state.settings, ...payload };
+    toast('Settings saved ✓', 'success');
+  } catch (e) { toast(e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = '💾 Save Settings'; }
+}
+window.saveSettings = saveSettings;
 
 /* ================= VIEW SWITCH ================= */
 function switchView(view) {
@@ -682,7 +801,7 @@ function setupLiveListeners() {
 
 function computeStats() {
   const orders = state.orders, products = state.products;
-  const revenue = orders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + Number(o.total || 0), 0);
+  const revenue = orders.filter(o => o.status !== 'cancelled' && o.status !== 'refunded').reduce((s, o) => s + Number(o.total || 0), 0);
   const emails = new Set(orders.map(o => o.customer?.email || '').filter(Boolean));
   const totalStock = products.reduce((s, p) => s + (Number(p.stock) || 0), 0);
   state.stats = {
@@ -695,12 +814,16 @@ function computeStats() {
   for (const o of orders) {
     const c = o.customer || {};
     const email = (c.email || '').toLowerCase() || ('guest-' + o.id);
-    if (!map.has(email)) map.set(email, { name: c.name || 'Guest', email: c.email || '—', phone: c.phone || '—', orders: 0, totalSpent: 0, lastOrder: 0 });
+    if (!map.has(email)) map.set(email, { name: c.name || 'Guest', email: c.email || '—', phone: c.phone || '—', address: c.address || '', orders: 0, totalSpent: 0, lastOrder: 0, orderIds: [] });
     const e = map.get(email);
     e.orders += 1; e.totalSpent += Number(o.total) || 0;
     const ts = toMillis(o.createdAt); if (ts > e.lastOrder) e.lastOrder = ts;
+    e.orderIds.push(o.id);
   }
   state.customers = Array.from(map.values()).sort((a, b) => b.lastOrder - a.lastOrder);
+  state.customers.forEach(c => {
+    c.segment = c.totalSpent >= 5000 || c.orders >= 5 ? 'vip' : (c.orders > 1 ? 'repeat' : 'new');
+  });
   updateNotifBadge();
 }
 
@@ -712,6 +835,8 @@ function updateNotifBadge() {
   if (pending.length) alerts.push({ icon: '🧾', title: `${pending.length} pending order(s)`, sub: 'Awaiting processing', view: 'orders' });
   const out = state.products.filter(p => Number(p.stock || 0) === 0);
   if (out.length) alerts.push({ icon: '🚫', title: `${out.length} product(s) out of stock`, sub: out.slice(0,3).map(p=>p.name).join(', '), view: 'inventory' });
+  const refunds = state.orders.filter(o => o.refundStatus === 'requested');
+  if (refunds.length) alerts.push({ icon: '💸', title: `${refunds.length} refund request(s)`, sub: 'Needs review', view: 'orders' });
   const badge = $('#notifBadge');
   if (alerts.length) { badge.textContent = alerts.length; badge.classList.remove('hidden'); } else badge.classList.add('hidden');
   const dd = $('#notifDropdown');
@@ -769,7 +894,7 @@ function renderDashboardCharts() {
     const key = d.toISOString().slice(0, 10);
     labels.push(d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }));
     const total = state.orders.reduce((s, o) => {
-      if (o.status === 'cancelled') return s;
+      if (o.status === 'cancelled' || o.status === 'refunded') return s;
       const ts = toMillis(o.createdAt); if (!ts) return s;
       return new Date(ts).toISOString().slice(0, 10) === key ? s + Number(o.total || 0) : s;
     }, 0);
@@ -794,24 +919,35 @@ function renderDashboardCharts() {
 }
 
 /* ================= PRODUCTS ================= */
+function refreshBrandFilter() {
+  const sel = $('#prodBrandFilter'); if (!sel) return;
+  const cur = sel.value;
+  const brands = [...new Set(state.products.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="all">All Brands</option>' + brands.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('');
+  if (brands.includes(cur)) sel.value = cur;
+}
 function renderProducts() {
   const tbody = $('#productsBody'); if (!tbody) return;
+  refreshBrandFilter();
   const search = ($('#prodSearch')?.value || '').toLowerCase().trim();
+  const brand = $('#prodBrandFilter')?.value || 'all';
   const cat = $('#prodCategoryFilter')?.value || 'all';
   const sort = $('#prodSort')?.value || 'newest';
   let list = state.products.filter(p => {
-    const ms = !search || (p.name||'').toLowerCase().includes(search) || (p.slug||'').toLowerCase().includes(search) || (p.variant||'').toLowerCase().includes(search);
+    const ms = !search || (p.name||'').toLowerCase().includes(search) || (p.slug||'').toLowerCase().includes(search) || (p.variant||'').toLowerCase().includes(search) || (p.brand||'').toLowerCase().includes(search);
+    const mb = brand === 'all' || p.brand === brand;
     const mc = cat === 'all' || p.category === cat;
-    return ms && mc;
+    return ms && mb && mc;
   });
   if (sort === 'price-asc') list.sort((a,b) => Number(a.price) - Number(b.price));
   else if (sort === 'price-desc') list.sort((a,b) => Number(b.price) - Number(a.price));
   else if (sort === 'name') list.sort((a,b) => (a.name||'').localeCompare(b.name||''));
   else if (sort === 'stock') list.sort((a,b) => Number(a.stock||0) - Number(b.stock||0));
-  if (!list.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty">No products match your filters.</td></tr>'; return; }
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty">No products match your filters.</td></tr>'; return; }
   tbody.innerHTML = list.map(p => `<tr>
     <td><img class="thumb" src="${esc(p.image||'')}" alt="" onerror="this.style.opacity=.2" /></td>
     <td><div class="cell-name">${esc(p.name)}</div><div class="cell-sub">${esc(p.variant||'')}</div></td>
+    <td>${esc(p.brand||'—')}</td>
     <td>${esc(p.category||'—')}</td>
     <td class="cell-price">${fmtMoney(p.price)}</td>
     <td>${Number(p.stock)||0}</td>
@@ -831,10 +967,47 @@ window.renderProducts = renderProducts;
 
 window.exportProducts = function () {
   if (!state.products.length) return toast('No products to export', 'error');
-  const rows = [['Name','Variant','Category','Price','Old Price','Stock','Slug','Featured']];
-  state.products.forEach(p => rows.push([p.name, p.variant||'', p.category||'', p.price, p.oldPrice||0, p.stock||0, p.slug||'', p.featured?'Yes':'No']));
+  const rows = [['Name','Variant','Brand','Category','Price','Old Price','Cost Price','Stock','Slug','Featured']];
+  state.products.forEach(p => rows.push([p.name, p.variant||'', p.brand||'', p.category||'', p.price, p.oldPrice||0, p.costPrice||0, p.stock||0, p.slug||'', p.featured?'Yes':'No']));
   downloadCSV(`products-${new Date().toISOString().slice(0,10)}.csv`, rows);
   toast('Products exported ✓', 'success');
+};
+
+window.importProductsCSV = async function (inputEl) {
+  const file = inputEl.files[0]; if (!file) return;
+  try {
+    const text = await file.text();
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) throw new Error('CSV khali hai ya header missing');
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/^"|"$/g, ''));
+    const requiredCols = ['name','price'];
+    for (const rc of requiredCols) if (!headers.includes(rc)) throw new Error(`Missing column: ${rc}`);
+    let imported = 0, failed = 0;
+    for (let i = 1; i < lines.length; i++) {
+      // Simple CSV parse (no escaped commas support inside quotes - fine for basic use)
+      const cells = lines[i].match(/(".*?"|[^,]+)/g) || [];
+      const clean = cells.map(c => c.replace(/^"|"$/g, '').trim());
+      const row = {}; headers.forEach((h, idx) => row[h] = clean[idx] || '');
+      if (!row.name || !row.price) { failed++; continue; }
+      try {
+        const slug = await ensureUniqueSlug(slugify(row.slug || row.name));
+        const payload = {
+          name: row.name, slug, variant: row.variant || '', brand: row.brand || '',
+          category: (row.category || 'general').toLowerCase(),
+          price: Number(row.price) || 0, oldPrice: Number(row.oldprice || row['old price']) || 0,
+          costPrice: Number(row.costprice || row['cost price']) || 0,
+          stock: Number(row.stock) || 0, image: row.image || '',
+          description: row.description || '', tag: row.tag || '',
+          rating: 5, reviews: 0, featured: true,
+          createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+        };
+        await addDoc(collection(db, 'products'), payload);
+        imported++;
+      } catch (e) { console.error(e); failed++; }
+    }
+    toast(`✓ ${imported} products imported${failed ? `, ${failed} failed` : ''}`, 'success');
+    inputEl.value = '';
+  } catch (e) { toast('Import failed: ' + e.message, 'error'); inputEl.value = ''; }
 };
 
 function openProductModal(product) {
@@ -845,15 +1018,20 @@ function openProductModal(product) {
   $('#f-name').value = product ? product.name : '';
   $('#f-slug').value = product ? (product.slug||'') : '';
   $('#f-variant').value = product ? (product.variant||'') : '';
+  $('#f-brand').value = product ? (product.brand||'') : '';
   $('#f-category').value = product ? (product.category||'general') : 'general';
   $('#f-price').value = product ? product.price : '';
   $('#f-oldPrice').value = product ? (product.oldPrice||'') : '';
+  $('#f-costPrice').value = product ? (product.costPrice||'') : '';
   $('#f-stock').value = product ? (product.stock||0) : 10;
   $('#f-tag').value = product ? (product.tag||'') : '';
   $('#f-rating').value = product ? (product.rating||5) : 5;
   $('#f-reviews').value = product ? (product.reviews||0) : 0;
   $('#f-image').value = product ? (product.image||'') : '';
+  $('#f-gallery').value = product ? (product.gallery||'') : '';
   $('#f-description').value = product ? (product.description||'') : '';
+  $('#f-metaTitle').value = product ? (product.metaTitle||'') : '';
+  $('#f-metaDescription').value = product ? (product.metaDescription||'') : '';
   $('#f-featured').checked = product ? product.featured !== false : true;
   $('#f-file').value = ''; $('#uploadStatus').textContent = '';
   updateSlugPreview(); updateImgPreview();
@@ -897,10 +1075,18 @@ async function saveProduct() {
     const file = $('#f-file').files[0];
     if (file) { $('#uploadStatus').textContent = 'Uploading image…'; image = await uploadImageFile(file, slug); $('#uploadStatus').textContent = '✓ Uploaded'; }
     const payload = {
-      name, slug, variant: $('#f-variant').value.trim(), category: $('#f-category').value,
-      price, oldPrice: Number($('#f-oldPrice').value) || 0, stock: Number($('#f-stock').value) || 0,
+      name, slug, variant: $('#f-variant').value.trim(),
+      brand: $('#f-brand').value.trim(),
+      category: $('#f-category').value,
+      price, oldPrice: Number($('#f-oldPrice').value) || 0,
+      costPrice: Number($('#f-costPrice').value) || 0,
+      stock: Number($('#f-stock').value) || 0,
       tag: $('#f-tag').value.trim(), rating: Number($('#f-rating').value) || 5, reviews: Number($('#f-reviews').value) || 0,
-      image, description: $('#f-description').value.trim(), featured: $('#f-featured').checked, updatedAt: serverTimestamp(),
+      image, gallery: $('#f-gallery').value.trim(),
+      description: $('#f-description').value.trim(),
+      metaTitle: $('#f-metaTitle').value.trim(),
+      metaDescription: $('#f-metaDescription').value.trim(),
+      featured: $('#f-featured').checked, updatedAt: serverTimestamp(),
     };
     if (id) { await updateDoc(doc(db, 'products', id), payload); toast('Product updated ✓', 'success'); }
     else { payload.createdAt = serverTimestamp(); await addDoc(collection(db, 'products'), payload); toast('Product added ✓', 'success'); }
@@ -929,9 +1115,9 @@ function renderOrders() {
     return ms && mStat && ts >= from && ts <= to;
   });
   if (!list.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty">No orders match your filters.</td></tr>'; return; }
-  const statuses = ['pending','processing','shipped','delivered','cancelled'];
+  const statuses = ['pending','processing','shipped','delivered','cancelled','refunded'];
   tbody.innerHTML = list.map(o => `<tr>
-    <td><strong>${esc(o.orderId || o.id.slice(0,10))}</strong>${o.couponCode ? `<div class="cell-sub" style="font-size:.7rem;color:var(--primary)">🎟 ${esc(o.couponCode)}</div>` : ''}</td>
+    <td><strong>${esc(o.orderId || o.id.slice(0,10))}</strong>${o.couponCode ? `<div class="cell-sub" style="font-size:.7rem;color:var(--primary)">🎟 ${esc(o.couponCode)}</div>` : ''}${o.trackingNumber ? `<div class="cell-sub" style="font-size:.7rem;color:var(--blue)">📦 ${esc(o.courier||'')} ${esc(o.trackingNumber)}</div>` : ''}</td>
     <td><div class="cell-name">${esc(o.customer?.name || 'Guest')}</div><div class="cell-sub">${esc(o.customer?.email || '')}</div></td>
     <td>${(o.items||[]).length}</td>
     <td class="cell-price">${fmtMoney(o.total)}</td>
@@ -952,10 +1138,10 @@ window.renderOrders = renderOrders;
 
 window.exportOrders = function () {
   if (!state.orders.length) return toast('No orders to export', 'error');
-  const rows = [['Order ID','Customer','Email','Phone','Items','Subtotal','Discount','Shipping','Total','Coupon','Status','Date']];
+  const rows = [['Order ID','Customer','Email','Phone','Items','Subtotal','Discount','Shipping','Total','Coupon','Status','Tracking','Courier','Date']];
   state.orders.forEach(o => {
     const c = o.customer || {};
-    rows.push([o.orderId || o.id, c.name||'Guest', c.email||'', c.phone||'', (o.items||[]).length, o.subtotal||0, o.discount||0, o.shipping||0, o.total||0, o.couponCode||'', o.status||'pending', fmtDateFull(o.createdAt)]);
+    rows.push([o.orderId || o.id, c.name||'Guest', c.email||'', c.phone||'', (o.items||[]).length, o.subtotal||0, o.discount||0, o.shipping||0, o.total||0, o.couponCode||'', o.status||'pending', o.trackingNumber||'', o.courier||'', fmtDateFull(o.createdAt)]);
   });
   downloadCSV(`orders-${new Date().toISOString().slice(0,10)}.csv`, rows);
   toast('Orders exported ✓', 'success');
@@ -975,7 +1161,7 @@ async function createTestOrder() {
   if (!sampleProducts.length) { toast('Add at least one product first', 'error'); return; }
   const items = sampleProducts.map(p => ({ id: p.id, name: p.name, variant: p.variant||'', price: Number(p.price)||0, image: p.image||'', quantity: 1 }));
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const shipping = subtotal > 999 ? 0 : 79;
+  const shipping = subtotal > (state.settings.freeShippingThreshold || 999) ? 0 : (state.settings.shippingRate || 79);
   const order = {
     orderId: 'ORD-' + Date.now().toString(36).toUpperCase(),
     customer: { name: 'Test Customer', email: 'test@example.com', phone: '+91 9876543210', address: '123 Test Street, Mumbai, India' },
@@ -990,16 +1176,56 @@ function openOrderDetail(id) {
   state.viewingOrderId = id;
   const c = o.customer || {}; const items = o.items || [];
   const statuses = ['pending','processing','shipped','delivered'];
-  const cancelled = o.status === 'cancelled';
+  const cancelled = o.status === 'cancelled' || o.status === 'refunded';
   const currentIdx = statuses.indexOf(o.status);
   $('#orderDetailTitle').textContent = `Order ${o.orderId || o.id.slice(0,10)}`;
+
+  // Tracking block
+  const trackingBlock = `
+    <div class="tracking-box no-print">
+      <div class="label" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);font-weight:600;margin-bottom:8px">📦 Shipping & Tracking</div>
+      <div class="detail-edit-row">
+        <div class="field"><label>Courier</label><input type="text" id="ot-courier" value="${esc(o.courier||'')}" placeholder="Delhivery / BlueDart" /></div>
+        <div class="field"><label>Tracking Number</label><input type="text" id="ot-trackingNumber" value="${esc(o.trackingNumber||'')}" placeholder="AWB / Tracking ID" /></div>
+        <button class="btn-primary" style="padding:8px 16px" onclick="window.saveOrderTracking()">Save Tracking</button>
+      </div>
+    </div>`;
+
+  // Notes block
+  const notesBlock = `
+    <div class="notes-box no-print">
+      <div class="label" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);font-weight:600;margin-bottom:8px">📝 Internal Notes</div>
+      <textarea id="ot-notes" style="width:100%;padding:8px 12px;border:1px solid #e5ddd3;border-radius:8px;font-family:inherit;font-size:.85rem;min-height:70px">${esc(o.notes||'')}</textarea>
+      <div style="margin-top:8px"><button class="btn-primary" style="padding:8px 16px" onclick="window.saveOrderNotes()">Save Notes</button></div>
+    </div>`;
+
+  // Refund block
+  let refundBlock = '';
+  if (o.status === 'refunded' || o.refundStatus === 'refunded') {
+    refundBlock = `
+      <div class="refund-box applied no-print">
+        <div class="label" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.8px;color:#7B1FA2;font-weight:600;margin-bottom:8px">💸 Refunded</div>
+        <div class="val"><strong>Amount:</strong> ${fmtMoney(o.refundAmount||0)}<br><strong>Reason:</strong> ${esc(o.refundReason||'—')}<br><strong>Refunded On:</strong> ${fmtDateFull(o.refundedAt)}</div>
+      </div>`;
+  } else if (!cancelled) {
+    refundBlock = `
+      <div class="refund-box no-print">
+        <div class="label" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.8px;color:var(--red);font-weight:600;margin-bottom:8px">💸 Refund / Return</div>
+        <div class="detail-edit-row">
+          <div class="field"><label>Refund Amount (₹)</label><input type="number" id="ot-refundAmount" value="${o.total||0}" min="0" /></div>
+          <div class="field" style="flex:2"><label>Reason</label><input type="text" id="ot-refundReason" placeholder="Customer request / Defective / Wrong item" /></div>
+          <button class="btn-danger" style="padding:8px 16px" onclick="window.markOrderRefunded()">Mark Refunded</button>
+        </div>
+      </div>`;
+  }
+
   $('#orderDetailBody').innerHTML = `
-    <div class="detail-block" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+    <div class="detail-block" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
       <div><div class="label">Order ID</div><div class="val"><strong>${esc(o.orderId || o.id)}</strong></div></div>
       <div><div class="label">Placed On</div><div class="val">${fmtDateFull(o.createdAt)}</div></div>
       <div><div class="label">Status</div><div class="val"><span class="badge badge-${o.status || 'pending'}">${o.status || 'pending'}</span></div></div>
     </div>
-    ${cancelled ? `<div class="timeline"><div class="timeline-step cancelled"><div class="timeline-dot">✕</div><span>Cancelled</span></div></div>` : `
+    ${cancelled ? `<div class="timeline"><div class="timeline-step cancelled"><div class="timeline-dot">✕</div><span>${o.status === 'refunded' ? 'Refunded' : 'Cancelled'}</span></div></div>` : `
       <div class="timeline">
         ${statuses.map((s, i) => `<div class="timeline-step ${i < currentIdx ? 'done' : i === currentIdx ? 'active' : ''}"><div class="timeline-dot">${i < currentIdx ? '✓' : i+1}</div><span>${s[0].toUpperCase()+s.slice(1)}</span></div>`).join('')}
       </div>`}
@@ -1007,7 +1233,10 @@ function openOrderDetail(id) {
       <div class="detail-block"><div class="label">Customer</div><div class="val"><strong>${esc(c.name || 'Guest')}</strong><br>${esc(c.email || '—')}<br>${esc(c.phone || '—')}</div></div>
       <div class="detail-block"><div class="label">Shipping Address</div><div class="val">${esc(c.address || '—')}</div></div>
     </div>
-    <div class="detail-block" style="margin-bottom:16px">
+    ${trackingBlock}
+    ${refundBlock}
+    ${notesBlock}
+    <div class="detail-block">
       <div class="label">Items (${items.length})</div>
       <div class="table-wrap" style="margin-top:10px"><table>
         <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
@@ -1029,6 +1258,44 @@ function openOrderDetail(id) {
     </div>`;
   $('#orderDetailModal').classList.remove('hidden');
 }
+
+window.saveOrderTracking = async function () {
+  if (!state.viewingOrderId) return;
+  const trackingNumber = $('#ot-trackingNumber').value.trim();
+  const courier = $('#ot-courier').value.trim();
+  try {
+    await updateDoc(doc(db, 'orders', state.viewingOrderId), { trackingNumber, courier, updatedAt: serverTimestamp() });
+    toast('Tracking saved ✓', 'success');
+  } catch (e) { toast(e.message, 'error'); }
+};
+
+window.saveOrderNotes = async function () {
+  if (!state.viewingOrderId) return;
+  const notes = $('#ot-notes').value.trim();
+  try {
+    await updateDoc(doc(db, 'orders', state.viewingOrderId), { notes, updatedAt: serverTimestamp() });
+    toast('Notes saved ✓', 'success');
+  } catch (e) { toast(e.message, 'error'); }
+};
+
+window.markOrderRefunded = async function () {
+  if (!state.viewingOrderId) return;
+  const amount = Number($('#ot-refundAmount').value) || 0;
+  const reason = $('#ot-refundReason').value.trim();
+  if (!confirm(`Mark this order as REFUNDED with amount ${fmtMoney(amount)}?`)) return;
+  try {
+    await updateDoc(doc(db, 'orders', state.viewingOrderId), {
+      refundStatus: 'refunded',
+      refundAmount: amount,
+      refundReason: reason,
+      refundedAt: serverTimestamp(),
+      status: 'refunded',
+      updatedAt: serverTimestamp(),
+    });
+    toast('Order marked refunded ✓', 'success');
+    openOrderDetail(state.viewingOrderId);
+  } catch (e) { toast(e.message, 'error'); }
+};
 
 /* ================= INVENTORY ================= */
 function renderInventory() {
@@ -1093,11 +1360,11 @@ async function setStock(id, num) {
 }
 window.exportInventory = function() {
   if (!state.products.length) return toast('No data to export', 'error');
-  const rows = [['Product Name','Category','Price (₹)','Stock','Status','Slug']];
+  const rows = [['Product Name','Brand','Category','Price (₹)','Cost Price','Stock','Status','Slug']];
   state.products.forEach(p => {
     const stock = Number(p.stock) || 0;
     const status = stock === 0 ? 'Out of Stock' : stock < 5 ? 'Low Stock' : 'In Stock';
-    rows.push([p.name, p.category, p.price, stock, status, p.slug]);
+    rows.push([p.name, p.brand||'', p.category, p.price, p.costPrice||0, stock, status, p.slug]);
   });
   downloadCSV(`silk-soul-inventory-${new Date().toISOString().split('T')[0]}.csv`, rows);
   toast('Inventory exported ✓', 'success');
@@ -1108,22 +1375,66 @@ function renderCustomers() {
   const tbody = $('#customersBody'); if (!tbody) return;
   const search = ($('#custSearch')?.value || '').toLowerCase().trim();
   let list = state.customers.filter(c => !search || (c.name||'').toLowerCase().includes(search) || (c.email||'').toLowerCase().includes(search) || (c.phone||'').toLowerCase().includes(search));
-  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">No customers found.</td></tr>'; return; }
-  tbody.innerHTML = list.map(c => `<tr>
-    <td class="cell-name">${esc(c.name)}</td>
-    <td>${esc(c.email)}</td>
-    <td>${esc(c.phone)}</td>
-    <td>${c.orders}</td>
-    <td class="cell-price">${fmtMoney(c.totalSpent)}</td>
-    <td>${c.lastOrder ? fmtDate(c.lastOrder) : '—'}</td>
-  </tr>`).join('');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty">No customers found.</td></tr>'; return; }
+  tbody.innerHTML = list.map(c => {
+    const segClass = c.segment === 'vip' ? 'vip' : c.segment === 'repeat' ? 'repeat' : 'new';
+    const segLabel = c.segment === 'vip' ? '⭐ VIP' : c.segment === 'repeat' ? '🔁 Repeat' : '🆕 New';
+    return `<tr>
+      <td class="cell-name">${esc(c.name)}</td>
+      <td>${esc(c.email)}</td>
+      <td>${esc(c.phone)}</td>
+      <td><span class="badge badge-${segClass}">${segLabel}</span></td>
+      <td>${c.orders}</td>
+      <td class="cell-price">${fmtMoney(c.totalSpent)}</td>
+      <td>${c.lastOrder ? fmtDate(c.lastOrder) : '—'}</td>
+      <td><button class="icon-btn" data-view-cust="${esc(c.email)}" title="View Details">👁</button></td>
+    </tr>`;
+  }).join('');
+  tbody.querySelectorAll('[data-view-cust]').forEach(btn => btn.addEventListener('click', () => openCustomerDetail(btn.dataset.viewCust)));
 }
 window.renderCustomers = renderCustomers;
 
+window.openCustomerDetail = function (email) {
+  const c = state.customers.find(x => x.email === email); if (!c) return;
+  state.viewingCustomerEmail = email;
+  const custOrders = state.orders.filter(o => (o.customer?.email || '').toLowerCase() === email.toLowerCase());
+  const segClass = c.segment === 'vip' ? 'vip' : c.segment === 'repeat' ? 'repeat' : 'new';
+  const segLabel = c.segment === 'vip' ? '⭐ VIP Customer' : c.segment === 'repeat' ? '🔁 Repeat Buyer' : '🆕 New Customer';
+  $('#customerDetailTitle').textContent = `Customer — ${c.name}`;
+  $('#customerDetailBody').innerHTML = `
+    <div class="detail-block">
+      <div class="label">Profile</div>
+      <div class="val">
+        <strong>${esc(c.name)}</strong>
+        <span class="badge badge-${segClass}" style="margin-left:8px">${segLabel}</span>
+        <br>📧 ${esc(c.email)}<br>📱 ${esc(c.phone)}<br>📍 ${esc(c.address || '—')}
+      </div>
+    </div>
+    <div class="stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
+      <div class="stat"><div class="label">Total Orders</div><div class="value" style="font-size:1.6rem">${c.orders}</div></div>
+      <div class="stat"><div class="label">Total Spent</div><div class="value" style="font-size:1.6rem">${fmtMoney(c.totalSpent)}</div></div>
+      <div class="stat"><div class="label">Last Order</div><div class="value" style="font-size:1.1rem">${c.lastOrder ? fmtDate(c.lastOrder) : '—'}</div></div>
+    </div>
+    <div class="detail-block">
+      <div class="label">Order History (${custOrders.length})</div>
+      <div class="table-wrap" style="margin-top:10px"><table>
+        <thead><tr><th>Order ID</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody>${custOrders.map(o => `<tr>
+          <td><strong>${esc(o.orderId || o.id)}</strong></td>
+          <td>${fmtDate(o.createdAt)}</td>
+          <td>${(o.items||[]).length}</td>
+          <td class="cell-price">${fmtMoney(o.total)}</td>
+          <td><span class="badge badge-${o.status || 'pending'}">${o.status || 'pending'}</span></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+  $('#customerDetailModal').classList.remove('hidden');
+};
+
 window.exportCustomers = function () {
   if (!state.customers.length) return toast('No customers to export', 'error');
-  const rows = [['Name','Email','Phone','Orders','Total Spent','Last Order']];
-  state.customers.forEach(c => rows.push([c.name, c.email, c.phone, c.orders, c.totalSpent, c.lastOrder ? fmtDateFull(c.lastOrder) : '']));
+  const rows = [['Name','Email','Phone','Segment','Orders','Total Spent','Last Order']];
+  state.customers.forEach(c => rows.push([c.name, c.email, c.phone, c.segment||'new', c.orders, c.totalSpent, c.lastOrder ? fmtDateFull(c.lastOrder) : '']));
   downloadCSV(`customers-${new Date().toISOString().slice(0,10)}.csv`, rows);
   toast('Customers exported ✓', 'success');
 };
@@ -1134,18 +1445,29 @@ function renderReports() {
   const days = Number($('#reportRange').value) || 30;
   const cutoff = Date.now() - days * 86400000;
   const orders = state.orders.filter(o => toMillis(o.createdAt) >= cutoff);
-  const valid = orders.filter(o => o.status !== 'cancelled');
+  const valid = orders.filter(o => o.status !== 'cancelled' && o.status !== 'refunded');
   const revenue = valid.reduce((s, o) => s + Number(o.total || 0), 0);
   const aov = valid.length ? revenue / valid.length : 0;
   const customersSet = new Set(valid.map(o => o.customer?.email).filter(Boolean));
   const units = valid.reduce((s, o) => s + (o.items || []).reduce((a, i) => a + (Number(i.quantity) || 1), 0), 0);
+
+  // Profit calc
+  let totalCost = 0;
+  valid.forEach(o => (o.items || []).forEach(it => {
+    const prod = state.products.find(p => p.id === it.id);
+    totalCost += (Number(prod?.costPrice) || 0) * (Number(it.quantity) || 1);
+  }));
+  const profit = revenue - totalCost;
+
   $('#reportStats').innerHTML = [
     { label: 'Revenue', value: fmtMoney(revenue), sub: `${days} days` },
-    { label: 'Orders', value: valid.length, sub: `${orders.length - valid.length} cancelled` },
+    { label: 'Est. Profit', value: fmtMoney(profit), sub: `Cost: ${fmtMoney(totalCost)}` },
+    { label: 'Orders', value: valid.length, sub: `${orders.length - valid.length} cancelled/refunded` },
     { label: 'Avg Order Value', value: fmtMoney(aov), sub: 'Per order' },
     { label: 'Customers', value: customersSet.size, sub: 'Unique buyers' },
     { label: 'Units Sold', value: units, sub: 'Total items' },
   ].map(c => `<div class="stat"><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`).join('');
+
   if (typeof Chart === 'undefined') return;
   const buckets = {}; const labels = [];
   for (let i = days - 1; i >= 0; i--) {
@@ -1163,15 +1485,18 @@ function renderReports() {
   destroyChart('reportRevenueChart');
   const rCtx = document.getElementById('reportRevenueChart');
   if (rCtx) charts.reportRevenueChart = new Chart(rCtx, { type: 'line', data: { labels, datasets: [{ label: 'Revenue (₹)', data: revData, borderColor: '#7B2D4E', backgroundColor: 'rgba(123,45,78,.08)', fill: true, tension: .35, pointRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { callback: v => '₹' + v } } } } });
-  const statuses = ['pending','processing','shipped','delivered','cancelled'];
+  const statuses = ['pending','processing','shipped','delivered','cancelled','refunded'];
   const statusCounts = statuses.map(s => orders.filter(o => (o.status || 'pending') === s).length);
   destroyChart('reportStatusChart');
   const sCtx = document.getElementById('reportStatusChart');
-  if (sCtx) charts.reportStatusChart = new Chart(sCtx, { type: 'doughnut', data: { labels: statuses.map(s => s[0].toUpperCase() + s.slice(1)), datasets: [{ data: statusCounts, backgroundColor: ['#D68910','#2874A6','#1E6FB8','#1F8A4C','#C0392B'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } } } });
+  if (sCtx) charts.reportStatusChart = new Chart(sCtx, { type: 'doughnut', data: { labels: statuses.map(s => s[0].toUpperCase() + s.slice(1)), datasets: [{ data: statusCounts, backgroundColor: ['#D68910','#2874A6','#1E6FB8','#1F8A4C','#C0392B','#7B1FA2'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } } } });
   const productSales = {}; const catSales = {};
   valid.forEach(o => (o.items || []).forEach(it => {
     const key = it.id || it.name;
-    if (!productSales[key]) productSales[key] = { name: it.name, qty: 0, revenue: 0 };
+    if (!productSales[key]) {
+      const prod = state.products.find(p => p.id === it.id);
+      productSales[key] = { name: it.name, qty: 0, revenue: 0, cost: (Number(prod?.costPrice) || 0) };
+    }
     productSales[key].qty += Number(it.quantity) || 1;
     productSales[key].revenue += (Number(it.price) || 0) * (Number(it.quantity) || 1);
     const prod = state.products.find(p => p.id === it.id);
@@ -1189,22 +1514,33 @@ function renderReports() {
     charts.reportCategoryChart = new Chart(cCtx, { type: 'bar', data: { labels: cats.map(c => c[0].toUpperCase() + c.slice(1)), datasets: [{ label: 'Sales (₹)', data: cats.map(c => catSales[c]), backgroundColor: '#C9A96E', borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { callback: v => '₹' + v } } } } });
   }
   const tbody = $('#topProductsBody');
-  if (!topList.length) tbody.innerHTML = '<tr><td colspan="4" class="empty">No sales in this period.</td></tr>';
-  else tbody.innerHTML = topList.map((p, i) => `<tr><td><strong>${i+1}</strong></td><td class="cell-name">${esc(p.name)}</td><td>${p.qty}</td><td class="cell-price">${fmtMoney(p.revenue)}</td></tr>`).join('');
+  if (!topList.length) tbody.innerHTML = '<tr><td colspan="6" class="empty">No sales in this period.</td></tr>';
+  else tbody.innerHTML = topList.map((p, i) => {
+    const totalCost = p.cost * p.qty;
+    const profit = p.revenue - totalCost;
+    return `<tr>
+      <td><strong>${i+1}</strong></td>
+      <td class="cell-name">${esc(p.name)}</td>
+      <td>${p.qty}</td>
+      <td class="cell-price">${fmtMoney(p.revenue)}</td>
+      <td>${fmtMoney(totalCost)}</td>
+      <td style="color:${profit>=0?'var(--green)':'var(--red)'};font-weight:600">${fmtMoney(profit)}</td>
+    </tr>`;
+  }).join('');
 }
 window.renderReports = renderReports;
 
 window.exportReport = function () {
   const days = Number($('#reportRange')?.value) || 30;
   const cutoff = Date.now() - days * 86400000;
-  const orders = state.orders.filter(o => toMillis(o.createdAt) >= cutoff && o.status !== 'cancelled');
+  const orders = state.orders.filter(o => toMillis(o.createdAt) >= cutoff && o.status !== 'cancelled' && o.status !== 'refunded');
   const rows = [['Order ID','Date','Customer','Email','Items','Total','Status']];
   orders.forEach(o => rows.push([o.orderId || o.id, fmtDateFull(o.createdAt), o.customer?.name || 'Guest', o.customer?.email || '', (o.items || []).length, o.total || 0, o.status || 'pending']));
   downloadCSV(`report-${days}d-${new Date().toISOString().slice(0,10)}.csv`, rows);
   toast('Report exported ✓', 'success');
 };
 
-/* ================= COUPONS (FIXED) ================= */
+/* ================= COUPONS ================= */
 function renderCoupons() {
   const tbody = $('#couponsBody'); if (!tbody) return;
   if (!state.coupons.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty">No coupons yet. Click "+ Create Coupon".</td></tr>'; return; }
@@ -1268,13 +1604,12 @@ async function saveCoupon() {
     if (!value || value <= 0) throw new Error('Valid value required');
     if (type === 'percent' && value > 100) throw new Error('Percentage 100 se zyada nahi ho sakta');
 
-    // ✅ Duplicate code check
     const dup = state.coupons.find(c => (c.code || '').toUpperCase() === code && c.id !== id);
     if (dup) throw new Error(`Coupon "${code}" already exists. Different code use karein.`);
 
     const payload = {
       code, type, value,
-      maxDiscount: Number($('#c-maxDiscount').value) || 0,  // ✅ NEW
+      maxDiscount: Number($('#c-maxDiscount').value) || 0,
       minOrder: Number($('#c-minOrder').value) || 0,
       maxUses: Number($('#c-maxUses').value) || 0,
       usedCount: id ? (state.coupons.find(c => c.id === id)?.usedCount || 0) : 0,
@@ -1339,6 +1674,8 @@ function bindEvents() {
   $$('[data-view-link]').forEach(a => a.addEventListener('click', (e) => { e.preventDefault(); switchView(a.dataset.viewLink); }));
   $('#notifBtn').addEventListener('click', (e) => { e.stopPropagation(); $('#notifDropdown').classList.toggle('hidden'); });
   document.addEventListener('click', (e) => { if (!e.target.closest('.notif-wrapper')) $('#notifDropdown').classList.add('hidden'); });
+
+  // Product modal
   $('#addProductBtn').addEventListener('click', () => openProductModal(null));
   $('#modalCloseBtn').addEventListener('click', closeProductModal);
   $('#modalCancelBtn').addEventListener('click', closeProductModal);
@@ -1353,18 +1690,30 @@ function bindEvents() {
     $('#uploadStatus').textContent = `Selected: ${file.name} (${(file.size/1024).toFixed(0)} KB) — Save par upload hoga`;
   });
   $('#productModal').addEventListener('click', (e) => { if (e.target.id === 'productModal') closeProductModal(); });
+
+  // Orders
   $('#testOrderBtn').addEventListener('click', createTestOrder);
   $('#orderDetailClose').addEventListener('click', () => $('#orderDetailModal').classList.add('hidden'));
   $('#orderDetailDone').addEventListener('click', () => $('#orderDetailModal').classList.add('hidden'));
   $('#orderDetailModal').addEventListener('click', (e) => { if (e.target.id === 'orderDetailModal') $('#orderDetailModal').classList.add('hidden'); });
+
+  // Customer detail
+  const cdc = $('#customerDetailClose'); if (cdc) cdc.addEventListener('click', () => $('#customerDetailModal').classList.add('hidden'));
+  const cdd = $('#customerDetailDone'); if (cdd) cdd.addEventListener('click', () => $('#customerDetailModal').classList.add('hidden'));
+  $('#customerDetailModal').addEventListener('click', (e) => { if (e.target.id === 'customerDetailModal') $('#customerDetailModal').classList.add('hidden'); });
+
+  // Coupons
   $('#addCouponBtn').addEventListener('click', () => openCouponModal(null));
   $('#couponModalClose').addEventListener('click', closeCouponModal);
   $('#couponCancel').addEventListener('click', closeCouponModal);
   $('#couponSave').addEventListener('click', saveCoupon);
   $('#couponModal').addEventListener('click', (e) => { if (e.target.id === 'couponModal') closeCouponModal(); });
+
+  // Settings
+  const ssb = $('#saveSettingsBtn'); if (ssb) ssb.addEventListener('click', saveSettings);
 }
 bindEvents();
-console.log('✦ Silk & Soul Admin ready (v3 — Coupons fixed + max discount cap)');
+console.log('✦ Silk & Soul Admin ready (v4 — Brand, Tracking, Refund, Notes, Customer Detail, Profit, Editable Settings)');
 </script>
 </body>
 </html>
